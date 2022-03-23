@@ -23,7 +23,7 @@ To install, run:
      # Or:
      $ yarn add --dev @cubified/react-simple-scheduler
 
-Minimal usage is as follows:
+Minimal usage of both modules is as follows:
 
 ```jsx
 import React, { useState } from "react";
@@ -43,7 +43,11 @@ function App(){
         events={events}
         selected={selected}
         setSelected={setSelected}
-        onRequestAdd={(evt) => alert("Add element requested")}
+        onRequestAdd={(evt) => {
+          const tmp = events.slice();
+          tmp.push(evt);
+          setEvents(tmp);
+        }}
         onRequestEdit={(evt) => alert("Edit element requested")}
       />
     </>
