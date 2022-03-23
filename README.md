@@ -1,8 +1,9 @@
 # react-simple-scheduler
 
-![demo.png](https://github.com/cubified/react-simple-scheduler/blob/main/demo/demo.png)
-
-[Try it now!](https://cubified.github.io/react-simple-scheduler/demo/build)
+| Demo |
+| --- |
+| ![demo.png](https://github.com/cubified/react-simple-scheduler/blob/main/demo/demo.png) |
+| [Try it now!](https://cubified.github.io/react-simple-scheduler/demo/build) |
 
 Simple, extensible scheduler and calendar components for React, modeled after Google Calendar.
 
@@ -68,24 +69,27 @@ This is relatively similar to what is contained in the [demo](https://github.com
 
 ## Detailed API Information
 
-### `<Calendar />`: Props
+### Calendar: Props
 
-#### `selected`
+#### **selected**
 
 The currently-selected date.
-Type: `Date`
-Required: Yes
 
-#### `setSelected`
+ - Type: `Date`
+ - Required: Yes
+
+#### **setSelected**
 
 The React function to change the value of `selected`.
-Type: `(val: Date) => void`
-Required: Yes
 
-#### `style`
+ - Type: `(val: Date) => void`
+ - Required: Yes
+
+#### **style**
 
 The style objects to be passed to the calendar's elements.
-Type:
+
+ - Type:
 ```ts
 {
   container: React.CSSProperties; // Refers to a <div> with className="react-simple-calendar"
@@ -93,14 +97,16 @@ Type:
   body: React.CSSProperties;      // Refers to a <table> with className="body"
 }
 ```
-Required: No
 
-### `<Scheduler />`: Props
+ - Required: No
 
-#### `events`
+### Scheduler: Props
+
+#### **events**
 
 The array of events to be drawn on the scheduler.
-Type: `Array<SchedulerExistingEvent>`
+
+ - Type: `Array<SchedulerExistingEvent>`
 ```ts
 interface SchedulerExistingEvent {
   from: Date;
@@ -110,44 +116,51 @@ interface SchedulerExistingEvent {
   style?: React.CSSProperties
 }
 ```
-Required: Yes
 
-#### `selected`
+ - Required: Yes
+
+#### **selected**
 
 The currently-selected date.
-Type: `Date`
-Required: Yes
 
-#### `setSelected`
+ - Type: `Date`
+ - Required: Yes
+
+#### **setSelected**
 
 The React function to change the value of `selected`.
-Type: `(val: Date) => void`
-Required: Yes
 
-#### `onRequestAdd`
+ - Type: `(val: Date) => void`
+ - Required: Yes
+
+#### **onRequestAdd**
 
 The function called when the user requests a new event be created.
-Type: `(evt: SchedulerEvent) => void`
-Required: Yes
-Note: The scheduler does **not** automatically add the new event to the `events` array.
 
-#### `onRequestEdit`
+ - Type: `(evt: SchedulerEvent) => void`
+ - Required: Yes
+ - Note: The scheduler does **not** automatically add the new event to the `events` array.
+
+#### **onRequestEdit**
 
 The function called when the user clicks on an existing event.
-Type: `(evt: SchedulerEvent) => void`
-Required: Yes
 
-#### `editable`
+ - Type: `(evt: SchedulerEvent) => void`
+ - Required: Yes
+
+#### **editable**
 
 Whether click-and-drag event creation is enabled.
-Type: `boolean`
-Required: No
-Default: `true`
 
-#### `style`
+ - Type: `boolean`
+ - Required: No
+ - Default: `true`
+
+#### **style**
 
 The style objects to be passed to the calendar's elements.
-Type:
+
+ - Type:
 ```ts
 {
   container: React.CSSProperties; // Refers to a <div> with className="react-simple-scheduler"
@@ -155,51 +168,52 @@ Type:
   body: React.CSSProperties;      // Refers to a <div> with className="body"
 }
 ```
-Required: No
+
+ - Required: No
 
 ---
 
-### `<Calendar />`: Styling
+### Calendar: Styling
 
 Note: [`Calendar.scss`](https://github.com/Cubified/react-simple-scheduler/blob/main/src/components/Calendar/Calendar.scss) provides the default styles, and is written to be as minimal and readable as possible.
 
-#### `.react-simple-calendar`
+#### **.react-simple-calendar**
 
 The main calendar container, containing all visible elements.
 
-#### `.react-simple-calendar .head`
+#### **.react-simple-calendar .head**
 
 The header containing the month name and forward/back buttons.
 
-#### `.react-simple-calendar .body`
+#### **.react-simple-calendar .body**
 
 The main body of the calendar, containing day buttons.
 
-#### `.react-simple-calendar .body td`
+#### **.react-simple-calendar .body td**
 
 An individual day in the calendar. Has the class `.selected` when it is clicked, and `.today` when it is the current date.
 
-### `<Scheduler />`: Styling
+### Scheduler: Styling
 
 Note: [`Scheduler.scss`](https://github.com/Cubified/react-simple-scheduler/blob/main/src/components/Scheduler/Scheduler.scss) provides the default styles, and is written to be as minimal and readable as possible.
 
-#### `.react-simple-scheduler`
+#### **.react-simple-scheduler**
 
 The main scheduler container, containing all visible elements.
 
-#### `.react-simple-scheduler .head`
+#### **.react-simple-scheduler .head**
 
 The header containing the month name, forward/back buttons, and "Today" button.
 
-#### `.react-simple-scheduler .body`
+#### **.react-simple-scheduler .body**
 
 The main body of the calendar, containing the table and added elements.
 
-#### `.react-simple-scheduler .body .schedule`
+#### **.react-simple-scheduler .body .schedule**
 
 The table containing hour-by-hour blocks.  Stores little information/style on its own, but the size of `<td>`s within it are used to compute the positions of added elements.
 
-#### `.react-simple-scheduler .body .event`
+#### **.react-simple-scheduler .body .event**
 
 An added event in the scheduler.  If it is currently being created (i.e. click-and-dragged), it has the `.current` class as well.
 
