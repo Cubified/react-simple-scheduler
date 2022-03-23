@@ -15,7 +15,7 @@ function App() {
       <Calendar
         selected={selected}
         setSelected={setSelected}
-        style={{padding: "12px"}}
+        style={{container: {padding: "12px"}}}
       />
       <Scheduler
         events={events}
@@ -27,7 +27,7 @@ function App() {
             ...cur,
             name: "New event",
             style: {
-              filter: `hue-rotate(${events.length * 40}deg)`,
+              filter: `hue-rotate(${(events.length + 1) * 40}deg)`,
             }
           });
           setEvents(tmp);

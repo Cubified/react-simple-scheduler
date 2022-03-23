@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from "react";
 import DATE_UTILS from "../../date";
 import { DateFormatter } from "../DateFormatter";
-import { CalendarProps, CalendarCell } from "../../types";
+import { CalendarProps, CalendarCell, CalendarStyles } from "../../types";
 import "./Calendar.scss";
 
 /**
  * Small calendar preview panel
  */
 function Calendar({ selected, setSelected, style }: CalendarProps) {
+  const style_fixed: CalendarStyles = {
+    container: (style ?? {}).container ?? {},
+    head: (style ?? {}).head ?? {},
+    body: (style ?? {}).body ?? {},
+  };
+
   const [rows, setRows] = useState<CalendarCell[][]>([]);
   const [viewMonth, setViewMonth] = useState<Date>(DATE_UTILS.first_of_month(DATE_UTILS.TODAY));
 
@@ -44,8 +50,8 @@ function Calendar({ selected, setSelected, style }: CalendarProps) {
   useEffect(() => setViewMonth(DATE_UTILS.first_of_month(selected)), [selected]);
 
   return (
-    <div className="react-simple-calendar" style={style ?? {}}>
-      <div className="head">
+    <div className="react-simple-calendar" style={style_fixed.container}>
+      <div className="head" style={style_fixed.head}>
         <span className="month">
           <DateFormatter date={viewMonth} fmt="O Y" />
         </span>
@@ -72,7 +78,12 @@ function Calendar({ selected, setSelected, style }: CalendarProps) {
           </button>
         </div>
       </div>
-      <table className="body" cellSpacing={0} cellPadding={0}>
+      <table
+        className="body"
+        style={style_fixed.body}
+        cellSpacing={0}
+        cellPadding={0}
+      >
         <thead>
           <tr>
             <th>S</th>

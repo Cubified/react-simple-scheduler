@@ -20,7 +20,7 @@ interface SchedulerCalendar {
 interface SchedulerEvent extends DateRange {
   calendar: SchedulerCalendar;
   is_current: boolean;
-  style: React.CSSProperties;
+  style?: React.CSSProperties;
 }
 
 interface SchedulerCurrentEvent extends SchedulerEvent {
@@ -47,7 +47,14 @@ interface SchedulerProps {
   onRequestAdd: (evt: SchedulerEvent) => void;
   onRequestEdit: (evt: SchedulerEvent) => void;
 
-  style: SchedulerStyles | null;
+  editable?: boolean,
+  style?: SchedulerStyles | null;
+}
+
+interface CalendarStyles {
+  container: React.CSSProperties;
+  head: React.CSSProperties;
+  body: React.CSSProperties;
 }
 
 interface CalendarCell {
@@ -57,8 +64,8 @@ interface CalendarCell {
 
 interface CalendarProps {
   selected: Date;
-  setSelected: (val: any) => void;
-  style: React.CSSProperties | null;
+  setSelected: (val: Date) => void;
+  style?: CalendarStyles | null;
 }
 
 export {
@@ -69,8 +76,10 @@ export {
   SchedulerEvent,
   SchedulerCurrentEvent,
   SchedulerExistingEvent,
+  SchedulerStyles,
   SchedulerProps,
 
+  CalendarStyles,
   CalendarCell,
   CalendarProps,
 }

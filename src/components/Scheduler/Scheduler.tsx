@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import DATE_UTILS from "../../date";
 import { DateFormatter, DateRangeFormatter } from "../DateFormatter";
-import { DateRange, SchedulerRectangle, SchedulerEvent, SchedulerCurrentEvent, SchedulerProps } from "../../types";
+import { DateRange, SchedulerRectangle, SchedulerEvent, SchedulerCurrentEvent, SchedulerStyles, SchedulerProps } from "../../types";
 import "./Scheduler.scss";
 
 /**
@@ -16,6 +16,7 @@ const Scheduler = ({
   onRequestAdd,
   onRequestEdit,
 
+  editable,
   style
 }: SchedulerProps) => {
   const dummyCurrentEvent: SchedulerCurrentEvent = {
@@ -25,6 +26,12 @@ const Scheduler = ({
     calendar: { name: "", enabled: true },
     is_current: true,
     style: {}
+  };
+
+  const style_fixed: SchedulerStyles = {
+    container: (style ?? {}).container ?? {},
+    head: (style ?? {}).head ?? {},
+    body: (style ?? {}).body ?? {},
   };
 
   /*
@@ -45,7 +52,7 @@ const Scheduler = ({
     if(!scrollRef.current) return;
     if (!eventSizeRef.current) return;
 
-    scrollRef.current.scrollTo(0, eventSizeRef.current.offsetHeight * 8);
+    scrollRef.current.scrollTo(0, (eventSizeRef.current.offsetHeight * 8) - 25);
 
     function resize(){
       setRerender(Math.random());
@@ -97,7 +104,7 @@ const Scheduler = ({
   }
 
   function styles_from_event(event: SchedulerEvent): React.CSSProperties {
-    const { from, to, calendar, style, is_current }: SchedulerEvent = event;
+    let { from, to, calendar, style, is_current }: SchedulerEvent = event;
 
     if (!from || !to) return {};
     if (
@@ -109,6 +116,14 @@ const Scheduler = ({
       };
     }
 
+    if (from > to) {
+      let tmp = from;
+      from = to;
+      to = tmp;
+    }
+
+    const rect = eventSizeRef.current.getBoundingClientRect();
+
     const pos = pos_from_date(from);
     const dif = DATE_UTILS.difference(to, from);
     if (dif === 0) return {};
@@ -116,7 +131,7 @@ const Scheduler = ({
     const out: React.CSSProperties = {
       top: `${pos.y}px`,
       height: `${Math.floor(
-        (dif / DATE_UTILS.HOUR_IN_MS) * eventSizeRef.current.getBoundingClientRect().height
+        (dif / DATE_UTILS.HOUR_IN_MS) * rect.height
       )}px`,
       ...style,
     };
@@ -127,11 +142,11 @@ const Scheduler = ({
       //   with a few tweaks)
       const overlaps: Array<SchedulerEvent> = [];
       let x: number = pos.x;
-      let w: number = 0.95 * eventSizeRef.current.getBoundingClientRect().width;
+      let w: number = 0.95 * rect.width;
       events.forEach((evt) => {
         if (evt.calendar.enabled && DATE_UTILS.dates_overlap(evt as DateRange, { from, to })) {
           overlaps.push(evt);
-       }
+        }
       });
 
       if (overlaps.length > 0) {
@@ -164,7 +179,7 @@ const Scheduler = ({
       out.width = `${w}px`;
     } else {
       out.left = `${pos.x}px`;
-      out.width = `${eventSizeRef.current.getBoundingClientRect().width}px`;
+      out.width = `${rect.width}px`;
       out.zIndex = 999;
     }
     return out;
@@ -174,6 +189,8 @@ const Scheduler = ({
    * EVENTS
    */
   const mouse_down = (e: MouseEvent): void => {
+    if(editable === false) return;
+
     const target = e.target as HTMLElement;
     if (target.tagName === "TH" || target.className.indexOf("time") > -1) return;
 
@@ -195,18 +212,11 @@ const Scheduler = ({
     const to = date_from_pos(e.clientX, e.clientY);
     if (!to) return;
 
-    if (to > currentEvent.from) {
+    if (to != currentEvent.from) {
       setCurrentEvent({
         ...currentEvent,
         from: currentEvent.from,
         to,
-        visible: true,
-      } as SchedulerCurrentEvent);
-    } else if (to < currentEvent.from) {
-      setCurrentEvent({
-        ...currentEvent,
-        from: to,
-        to: currentEvent.from,
         visible: true,
       } as SchedulerCurrentEvent);
     } else {
@@ -232,10 +242,18 @@ const Scheduler = ({
       tmp.to = DATE_UTILS.walk_hour(currentEvent.from);
     }
 
+    if(tmp.from > tmp.to){
+      let d = tmp.from;
+      tmp.from = tmp.to;
+      tmp.to = d;
+    }
+
     onRequestAdd({
-      ...currentEvent,
+      from: tmp.from,
+      to: tmp.to,
+      calendar: currentEvent.calendar,
       is_current: false,
-    });
+    } as SchedulerEvent);
     setCurrentEvent(dummyCurrentEvent);
   };
 
@@ -245,11 +263,11 @@ const Scheduler = ({
   return (
     <div
       className="react-simple-scheduler"
-      style={(style ?? {}).container ?? {}}
+      style={style_fixed.container}
     >
       <div
         className="head"
-        style={(style ?? {}).head ?? {}}
+        style={style_fixed.head}
       >
         <button
           type="button"
@@ -287,7 +305,7 @@ const Scheduler = ({
       <div
         ref={scrollRef}
         className={`body ${rerender}`}
-        style={(style ?? {}).body ?? {}}
+        style={style_fixed.body}
       >
         <table
           role="presentation"

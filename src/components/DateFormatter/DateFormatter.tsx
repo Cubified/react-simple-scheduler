@@ -107,12 +107,19 @@ function DateRangeFormatter({ from, to }: { from: Date, to: Date }) {
   const [toStr, setToStr] = useState("s P");
 
   useEffect(() => {
-    const same_period =
-      (from.getHours() < 12 && to.getHours() < 12) ||
-      (from.getHours() >= 12 && to.getHours() >= 12);
+    let from_fixed = from, to_fixed = to;
 
-    setFromStr(date_format(from, `s${same_period ? "" : " P"} – `));
-    setToStr(date_format(to, "s P"));
+    if(from > to){
+      from_fixed = to;
+      to_fixed = from;
+    }
+
+    const same_period =
+      (from_fixed.getHours() < 12 && to_fixed.getHours() < 12) ||
+      (from_fixed.getHours() >= 12 && to_fixed.getHours() >= 12);
+
+    setFromStr(date_format(from_fixed, `s${same_period ? "" : " P"} – `));
+    setToStr(date_format(to_fixed, "s P"));
   }, [from, to]);
 
   return (
