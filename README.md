@@ -27,9 +27,9 @@ Simple, extensible scheduler and calendar components for React, modeled after Go
 
 To install, run:
 
-     $ npm install --save @cubified/react-simple-scheduler
+     $ npm install --save @cubedoodl/react-simple-scheduler
      # Or:
-     $ yarn add @cubified/react-simple-scheduler
+     $ yarn add @cubedoodl/react-simple-scheduler
 
 ## Example
 
@@ -37,7 +37,7 @@ Minimal usage of both modules is as follows:
 
 ```jsx
 import React, { useState } from "react";
-import { Calendar, Scheduler } from "@cubified/react-simple-scheduler";
+import { Calendar, Scheduler } from "@cubedoodl/react-simple-scheduler";
 
 function App(){
   const [selected, setSelected] = useState(new Date());
@@ -231,7 +231,7 @@ Next, build the library with:
      # Or:
      $ yarn run rollup
 
-This will create a CommonJS module in `dist/cjs`, and an ES module in `dist/esm`.
+This will create an ES module in `dist/`.
 
 To start the demo application, run:
 

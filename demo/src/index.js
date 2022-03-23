@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import { Calendar, Scheduler } from "./dist/esm/index.m.js";
+import { Calendar, Scheduler } from "./dist/index.js";
 import "./index.css";
 
 function App() {

@@ -1,11 +1,12 @@
 {
-  "name": "@cubified/react-simple-scheduler",
+  "name": "@cubedoodl/react-simple-scheduler",
   "version": "1.0.0",
   "description": "A simple, dependency-free calendar/scheduler for React",
-  "main": "dist/cjs/index.js",
-  "module": "dist/esm/index.m.js",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
   "files": [
-    "dist"
+    "dist",
+    "src"
   ],
   "types": "dist/index.d.ts",
   "scripts": {
@@ -15,23 +16,19 @@
     "type": "git",
     "url": "git+https://github.com/Cubified/react-simple-scheduler.git"
   },
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com/Cubified"
-  },
   "keywords": [
     "react",
     "calendar",
     "scheduler",
     "timetable"
   ],
-  "author": "Cubified",
+  "author": "cubedoodl",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Cubified/react-simple-scheduler/issues"
   },
   "homepage": "https://github.com/Cubified/react-simple-scheduler#readme",
   "devDependencies": {
-    "@rollup/plugin-commonjs": "^21.0.2",
     "@rollup/plugin-eslint": "^8.0.1",
     "@rollup/plugin-node-resolve": "^13.1.3",
     "@rollup/plugin-typescript": "^8.3.1",
