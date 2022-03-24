@@ -264,6 +264,8 @@ const Scheduler = ({
     <div
       className="react-simple-scheduler"
       style={style_fixed.container}
+      role="complementary"
+      aria-label="Calendar"
     >
       <div
         className="head"
@@ -273,6 +275,7 @@ const Scheduler = ({
           type="button"
           className="today"
           onClick={() => setSelected(DATE_UTILS.TODAY)}
+          aria-label="View current week"
         >
           Today
         </button>
@@ -280,6 +283,7 @@ const Scheduler = ({
           type="button"
           className="chevron"
           onClick={() => setSelected(DATE_UTILS.walk_day(selected, -7))}
+          aria-label="View previous week"
         >
           <svg width="8" height="18" viewBox="0 0 8 18" fill="none" xmlns="http://www.w3.org/2000/svg" transform="translate(0 4)">
             <line x1="7.35337" y1="0.353553" x2="0.353371" y2="7.35355" stroke="black" />
@@ -293,6 +297,7 @@ const Scheduler = ({
           type="button"
           className="chevron flipped"
           onClick={() => setSelected(DATE_UTILS.walk_day(selected, 7))}
+          aria-label="View next week"
         >
           <svg width="8" height="18" viewBox="0 0 8 18" fill="none" xmlns="http://www.w3.org/2000/svg" transform="translate(0 4)">
             <line x1="7.35337" y1="0.353553" x2="0.353371" y2="7.35355" stroke="black" />
@@ -306,6 +311,7 @@ const Scheduler = ({
         ref={scrollRef}
         className={`body ${rerender}`}
         style={style_fixed.body}
+        tabIndex={0}
       >
         <table
           role="presentation"
@@ -368,6 +374,7 @@ const Scheduler = ({
                   onRequestEdit(evt);
                 }
               }}
+              aria-label={`Event with title ${evt.name}`}
             >
               <div className="time">
                 <DateRangeFormatter from={evt.from} to={evt.to} />
@@ -398,8 +405,8 @@ const Scheduler = ({
           className="ticker"
           style={{
             display: DATE_UTILS.is_within_week(weekStart, DATE_UTILS.TODAY) ? "block" : "none",
-            top: `${pos_from_date(new Date()).y}px`,
-            left: `${pos_from_date(new Date()).x}px`,
+            top: `${pos_from_date(DATE_UTILS.TODAY).y}px`,
+            left: `${pos_from_date(DATE_UTILS.TODAY).x}px`,
             width: `${eventSizeRef.current ? eventSizeRef.current.getBoundingClientRect().width : 0}px`,
           }}
         >

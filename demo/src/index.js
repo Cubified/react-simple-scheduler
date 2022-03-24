@@ -3,15 +3,23 @@ import ReactDOM from 'react-dom';
 import { Calendar, Scheduler } from "./dist/index.js";
 import "./index.css";
 
+/*
+import axe from "@axe-core/react";
+axe(React, ReactDOM, 1000);
+*/
+
 function App() {
   const [selected, setSelected] = useState(new Date());
   const [events, setEvents] = useState([]);
 
   return (
-    <div style={{
-      display: "flex",
-      justifyContent: "space-between",
-    }}>
+    <main
+      style={{
+        display: "flex",
+        justifyContent: "space-between",
+      }}
+      role="main"
+    >
       <Calendar
         selected={selected}
         setSelected={setSelected}
@@ -38,10 +46,10 @@ function App() {
         style={{
           container: { width: "calc(100vw - 200px)" },
           head: { width: "calc(100vw - 200px)" },
-          body: { height: "calc(100vh - 70px", width: "calc(100vw - 200px)" }
+          body: { height: "calc(100vh - 70px)", width: "calc(100vw - 200px)" }
         }}
       />
-    </div>
+    </main>
   );
 }
 

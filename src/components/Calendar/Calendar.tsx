@@ -50,7 +50,12 @@ function Calendar({ selected, setSelected, style }: CalendarProps) {
   useEffect(() => setViewMonth(DATE_UTILS.first_of_month(selected)), [selected]);
 
   return (
-    <div className="react-simple-calendar" style={style_fixed.container}>
+    <div
+      className="react-simple-calendar"
+      style={style_fixed.container}
+      role="complementary"
+      aria-label="Scheduler"
+    >
       <div className="head" style={style_fixed.head}>
         <span className="month">
           <DateFormatter date={viewMonth} fmt="O Y" />
@@ -60,6 +65,7 @@ function Calendar({ selected, setSelected, style }: CalendarProps) {
             type="button"
             className="chevron"
             onClick={() => setViewMonth(DATE_UTILS.walk_month(viewMonth, -1))}
+            aria-label="View previous month"
           >
             <svg width="8" height="18" viewBox="0 0 8 18" fill="none" xmlns="http://www.w3.org/2000/svg" transform="translate(0 4)">
               <line x1="7.35337" y1="0.353553" x2="0.353371" y2="7.35355" stroke="black" />
@@ -70,6 +76,7 @@ function Calendar({ selected, setSelected, style }: CalendarProps) {
             type="button"
             className="chevron flipped"
             onClick={() => setViewMonth(DATE_UTILS.walk_month(viewMonth))}
+            aria-label="View next month"
           >
             <svg width="8" height="18" viewBox="0 0 8 18" fill="none" xmlns="http://www.w3.org/2000/svg" transform="translate(0 4)">
               <line x1="7.35337" y1="0.353553" x2="0.353371" y2="7.35355" stroke="black" />

@@ -9,19 +9,15 @@ Simple, extensible scheduler and calendar components for React, modeled after Go
 
 ## Features
 
- - Unobtrusive and unopinionated components -- very simple and easy to drop into an existing project
- - Works with native JS `Date` objects
- - Entirely self-contained, each fitting cleanly into unstyled `<div>`s
+ - Provides a month-by-month calendar component, and a week-by-week scheduler component
+   - Automatically resizes overlapping events to best fit the screen
+   - Supports click-and-drag event creation
+   - Works with native JS `Date` objects
+   - Entirely self-contained, with each fitting cleanly into unstyled `<div>`s
+   - Fully customizable either by class names or `style` prop
+   - Accessible/ARIA-compliant
  - Dependency-free other than React itself
- - Exposes a simple interface for working with the components' data
-
- - Provides a month-by-month calendar view component
-    - Fully customizable either by class names or `style` prop
- - Provides a week-by-week scheduler component
-    - Automatically resizes overlapping events to best fit the screen
-    - Supports click-and-drag event creation
-    - Responsive, fitting comfortably in a desktop window
-    - Fully customizable either by class names or `style` prop
+ - Exposes simple interfaces for working with components' data
 
 ## Installation and Usage
 
@@ -99,6 +95,8 @@ The style objects to be passed to the calendar's elements.
 ```
 
  - Required: No
+
+---
 
 ### Scheduler: Props
 
@@ -193,6 +191,8 @@ The main body of the calendar, containing day buttons.
 
 An individual day in the calendar. Has the class `.selected` when it is clicked, and `.today` when it is the current date.
 
+---
+
 ### Scheduler: Styling
 
 Note: [`Scheduler.scss`](https://github.com/Cubified/react-simple-scheduler/blob/main/src/components/Scheduler/Scheduler.scss) provides the default styles, and is written to be as minimal and readable as possible.
@@ -240,3 +240,8 @@ To start the demo application, run:
      $ npm run start
      # Or:
      $ yarn run start
+
+## To-Do
+
+ - Mobile support
+ - More accesibility features
