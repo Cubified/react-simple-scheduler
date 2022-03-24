@@ -51,7 +51,7 @@
    * CALENDAR TABLE
    */
   .body {
-    height: 100vh;
+    height: 100%;
     overflow: auto;
     position: relative;
 
@@ -98,12 +98,16 @@
         border-bottom: 1px solid #bbbcbc;
       }
       td.time {
+        width: 61px;
         transform: translateY(-24px);
         border: none !important;
         font-size: 12px;
         color: #bbbcbc;
         text-align: right;
         padding-right: 9px;
+      }
+      th.time {
+        width: 61px;
       }
     }
 

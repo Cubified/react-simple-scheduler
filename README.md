@@ -15,9 +15,10 @@ Simple, extensible scheduler and calendar components for React, modeled after Go
    - Works with native JS `Date` objects
    - Entirely self-contained, with each fitting cleanly into unstyled `<div>`s
    - Fully customizable either by class names or `style` prop
-   - Accessible/ARIA-compliant
+   - Accessible and ARIA-compliant
  - Dependency-free other than React itself
  - Exposes simple interfaces for working with components' data
+   - Includes a custom (optional) `useArrayState` React hook to simplify appending to and deleting from a state array
 
 ## Installation and Usage
 
@@ -29,15 +30,15 @@ To install, run:
 
 ## Example
 
-Minimal usage of both modules is as follows:
+Minimal usage of both modules (including the custom hook) is as follows:
 
 ```jsx
 import React, { useState } from "react";
-import { Calendar, Scheduler } from "@cubedoodl/react-simple-scheduler";
+import { Calendar, Scheduler, useArrayState } from "@cubedoodl/react-simple-scheduler";
 
 function App(){
   const [selected, setSelected] = useState(new Date());
-  const [events, setEvents] = useState([]);
+  const [events, setEvents, addEvent] = useArrayState();
 
   return (
     <>
@@ -49,11 +50,7 @@ function App(){
         events={events}
         selected={selected}
         setSelected={setSelected}
-        onRequestAdd={(evt) => {
-          const tmp = events.slice();
-          tmp.push(evt);
-          setEvents(tmp);
-        }}
+        onRequestAdd={(evt) => addEvent(evt)}
         onRequestEdit={(evt) => alert("Edit element requested")}
       />
     </>
@@ -216,6 +213,33 @@ The table containing hour-by-hour blocks.  Stores little information/style on it
 #### **.react-simple-scheduler .body .event**
 
 An added event in the scheduler.  If it is currently being created (i.e. click-and-dragged), it has the `.current` class as well.
+
+---
+
+### useArrayState
+
+A wrapper around React's standard `useState` hook, as well as two utility functions for adding and removing elements respectively.
+
+ - Type:
+
+```ts
+useArrayState(initial: Array | null) => [
+  Array,
+  (new_val: Array | null) => void,
+  (new_el: any) => void,
+  (to_remove: any) => void
+]
+```
+
+ - Example:
+
+```ts
+const [arr, setArr, addEl, removeEl] = useArrayState();
+
+setArr([ 1, 2, 3 ]); // arr is now [ 1, 2, 3 ]
+addEl(4);            // arr is now [ 1, 2, 3, 4 ]
+removeEl(2);         // arr is now [ 1, 3, 4 ]
+```
 
 ## Setting up and Compiling for Development
 
