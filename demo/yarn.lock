@@ -1141,6 +1141,11 @@
   dependencies:
     postcss-value-parser "^4.2.0"
 
+"@cubedoodl/react-simple-scheduler@1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@cubedoodl/react-simple-scheduler/-/react-simple-scheduler-1.0.1.tgz#c1248aa5ca4af9e7c9374d8b58b1f87b3174f112"
+  integrity sha512-NNMTN+6IkRB/PCqzqOLkvTclCL0LDQI4TFAbZBdQZM6OQzNhKMHmi8ewO5fM7MuIQx5zDrr9WDM5eDe8pspxlw==
+
 "@eslint/eslintrc@^1.2.1":
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/@eslint/eslintrc/-/eslintrc-1.2.1.tgz#8b5e1c49f4077235516bc9ec7d41378c0f69b8c6"
