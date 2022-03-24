@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap');
+
+body {
+  margin: 0;
+  font-family: "Lato", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+
+  background: #f3f3f3;
+}
+
+.react-simple-calendar,
+.react-simple-scheduler {
+  font-family: "Lato", sans-serif;
+}
