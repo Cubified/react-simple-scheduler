@@ -69,7 +69,7 @@
         background: white;
         top: 0;
         position: sticky;
-        z-index: 1001;
+        z-index: 100;
       }
       th.today {
         color: rgba(64, 64, 200, 0.9);
@@ -135,12 +135,12 @@
     }
     .current {
       box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-      z-index: 1000 !important;
+      z-index: 99 !important;
     }
 
     .ticker {
       position: absolute;
-      z-index: 1000;
+      z-index: 99;
       transform: translateY(-4px);
 
       .ball {

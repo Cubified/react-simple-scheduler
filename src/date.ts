@@ -112,6 +112,7 @@ const compare_times = (a: Date, b: Date) =>
 const difference = (a: Date, b: Date) =>
   (a.getHours() - b.getHours()) * HOUR_IN_MS + (a.getMinutes() - b.getMinutes()) * MINUTE_IN_MS;
 const dates_overlap = (a: DateRange, b: DateRange) => a.from <= b.to && a.to >= b.from;
+const dates_overlap_exclusive = (a: DateRange, b: DateRange) => a.from < b.to && a.to > b.from;
 
 const copy_ymd = (date: Date, ymd: Date) => {
   const tmp = new Date(ymd);
@@ -151,6 +152,7 @@ export default {
   difference,
 
   dates_overlap,
+  dates_overlap_exclusive,
 
   copy_ymd,
   copy_time,

@@ -18,7 +18,7 @@ interface SchedulerCalendar {
 }
 
 interface SchedulerEvent extends DateRange {
-  calendar: SchedulerCalendar;
+  calendar: SchedulerCalendar | Array<SchedulerCalendar>;
   is_current: boolean;
   style?: React.CSSProperties;
 }
@@ -29,7 +29,6 @@ interface SchedulerCurrentEvent extends SchedulerEvent {
 
 interface SchedulerExistingEvent extends SchedulerEvent {
   name: string;
-  calendar: SchedulerCalendar;
 }
 
 interface SchedulerStyles {

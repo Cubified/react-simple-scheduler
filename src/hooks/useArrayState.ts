@@ -4,9 +4,10 @@ function useArrayState(initial: Array<any> | null): Array<any> {
   const [array, setArray] = useState<Array<any>>(initial ?? []);
 
   const doAppend = (new_el: any) => {
-    const tmp: Array<any> = array.slice();
-    tmp.push(new_el);
-    setArray(tmp);
+    setArray([
+      ...array,
+      new_el
+    ]);
   };
 
   const doDelete = (to_remove: any) => {

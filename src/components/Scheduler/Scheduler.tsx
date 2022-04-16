@@ -1,7 +1,15 @@
 import React, { useState, useEffect, useRef } from "react";
 import DATE_UTILS from "../../date";
 import { DateFormatter, DateRangeFormatter } from "../DateFormatter";
-import { DateRange, SchedulerRectangle, SchedulerEvent, SchedulerCurrentEvent, SchedulerStyles, SchedulerProps } from "../../types";
+import {
+  DateRange,
+  SchedulerRectangle,
+  SchedulerCalendar,
+  SchedulerEvent,
+  SchedulerCurrentEvent,
+  SchedulerStyles,
+  SchedulerProps
+} from "../../types";
 import "./Scheduler.scss";
 
 /**
@@ -104,12 +112,17 @@ const Scheduler = ({
   }
 
   function styles_from_event(event: SchedulerEvent): React.CSSProperties {
-    let { from, to, calendar, style, is_current }: SchedulerEvent = event;
+    let { from, to, style, is_current }: SchedulerEvent = event;
+
+    const is_enabled = (evt: SchedulerEvent) =>
+      Array.isArray(evt.calendar)
+        ? evt.calendar.some((cal: SchedulerCalendar) => cal.enabled)
+        : evt.calendar.enabled;
 
     if (!from || !to) return {};
     if (
       !DATE_UTILS.is_within_week(weekStart, from) ||
-      (!calendar.enabled && !is_current)
+      (!is_enabled(event) && !is_current)
     ) {
       return {
         display: "none",
@@ -144,7 +157,7 @@ const Scheduler = ({
       let x: number = pos.x;
       let w: number = 0.95 * rect.width;
       events.forEach((evt) => {
-        if (evt.calendar.enabled && DATE_UTILS.dates_overlap(evt as DateRange, { from, to })) {
+        if (is_enabled(evt) && DATE_UTILS.dates_overlap_exclusive(evt as DateRange, { from, to })) {
           overlaps.push(evt);
         }
       });
@@ -180,7 +193,7 @@ const Scheduler = ({
     } else {
       out.left = `${pos.x}px`;
       out.width = `${rect.width}px`;
-      out.zIndex = 999;
+      out.zIndex = 99;
     }
     return out;
   };
@@ -212,13 +225,22 @@ const Scheduler = ({
     const to = date_from_pos(e.clientX, e.clientY);
     if (!to) return;
 
-    if (to != currentEvent.from) {
-      setCurrentEvent({
-        ...currentEvent,
-        from: currentEvent.from,
-        to,
-        visible: true,
-      } as SchedulerCurrentEvent);
+    if (to !== currentEvent.from) {
+      if (currentEvent.from.getDate() !== to.getDate()) {
+        setCurrentEvent({
+          ...currentEvent,
+          from: DATE_UTILS.copy_time(new Date(to), currentEvent.from),
+          to,
+          visible: true,
+        } as SchedulerCurrentEvent);
+      } else {
+        setCurrentEvent({
+          ...currentEvent,
+          from: currentEvent.from,
+          to,
+          visible: true,
+        } as SchedulerCurrentEvent);
+      }
     } else {
       setCurrentEvent({
         ...currentEvent,
@@ -361,7 +383,7 @@ const Scheduler = ({
         {
           events.map((evt) => (
             <div
-              key={evt.to.getTime() + evt.from.getTime()}
+              key={evt.to.getTime() + evt.from.getTime() + evt.name}
               role="presentation"
               className="event"
               style={styles_from_event(evt)}
