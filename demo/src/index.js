@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { Calendar, Scheduler, useArrayState } from "@cubedoodl/react-simple-scheduler";
+/* import { Calendar, Scheduler, useArrayState } from "./dist"; */
 import "./index.css";
 
 /*

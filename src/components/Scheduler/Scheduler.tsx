@@ -390,8 +390,11 @@ const Scheduler = ({
               onMouseDown={mouse_down as any}
               onMouseMove={mouse_move as any}
               onMouseUp={(e: any) => {
-                if (currentEvent && currentEvent.visible) mouse_up(e);
-                else {
+                if (currentEvent &&
+                    currentEvent.visible &&
+                    !DATE_UTILS.compare_times(currentEvent.from, currentEvent.to)) {
+                  mouse_up(e);
+                } else {
                   setCurrentEvent(dummyCurrentEvent);
                   onRequestEdit(evt);
                 }
