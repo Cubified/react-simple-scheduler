@@ -23,7 +23,7 @@ interface SchedulerRectangle {
 
 interface SchedulerCalendar {
   name: string;
-  enabled: boolean;
+  enabled: boolean | (() => boolean);
 }
 
 interface SchedulerEvent extends DateRange {

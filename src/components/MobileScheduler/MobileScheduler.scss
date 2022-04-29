@@ -1,0 +1,84 @@
+.react-simple-mobile-scheduler {
+  width: 100%;
+  overflow: auto;
+  background: white;
+  padding: 20px;
+  box-sizing: border-box;
+  border-radius: 15px;
+  font-family: inherit;
+
+  .month {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    text-align: center;
+    font-family: inherit;
+
+    .line {
+      height: 1px;
+      background: #1f1f1f;
+      flex: 1;
+    }
+    .format {
+      margin: 0 10px;
+    }
+  }
+
+  .ticker {
+    display: flex;
+    align-items: center;
+    margin-bottom: 5px;
+
+    .ball {
+      width: 10px;
+      height: 10px;
+      border-radius: 10px;
+      background: rgba(64, 64, 200, 0.9);
+    }
+    .line {
+      height: 2px;
+      background: rgba(64, 64, 200, 0.9);
+      flex: 1;
+    }
+  }
+
+  .event {
+    display: flex;
+
+    .date {
+      width: 50px;
+      font-family: inherit;
+
+      .number {
+        font-size: 20pt;
+      }
+    }
+
+    .box {
+      display: flex;
+      align-items: center;
+      text-align: left;
+      flex: 1;
+
+      background: #ccf1f0;
+      color: #00bab3;
+      min-height: 52px;
+      padding: 10px;
+      margin-bottom: 5px;
+      box-sizing: border-box;
+      border: none;
+      border-radius: 6px;
+      font-family: inherit;
+      font-size: 16px;
+      overflow: hidden;
+      cursor: pointer;
+
+      .name {
+        font-weight: 600;
+      }
+      .range {
+        font-size: 11px;
+      }
+    }
+  }
+}

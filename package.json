@@ -1,6 +1,6 @@
 {
   "name": "@cubedoodl/react-simple-scheduler",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "A simple, dependency-free calendar/scheduler for React",
   "main": "dist/index.js",
   "module": "dist/index.js",

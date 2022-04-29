@@ -173,9 +173,11 @@ const Scheduler = ({
     let { from, to, style, is_current }: SchedulerEvent = event;
 
     const is_enabled = (evt: SchedulerEvent) =>
-      Array.isArray(evt.calendar)
-        ? evt.calendar.some((cal: SchedulerCalendar) => cal.enabled)
-        : evt.calendar.enabled;
+      (Array.isArray(evt.calendar) ? evt.calendar : [evt.calendar])
+        .some((cal: SchedulerCalendar) => {
+          if (typeof cal.enabled === "boolean") return cal.enabled;
+          return cal.enabled();
+        });
 
     if (!from || !to) return {};
     if (
@@ -193,7 +195,12 @@ const Scheduler = ({
       to = tmp;
     }
 
-    const rect = eventSizeRef.current.getBoundingClientRect();
+    const rect = (eventSizeRef.current ?? {
+      getBoundingClientRect: () => ({
+        width: window.innerWidth * 0.1,
+        height: window.innerHeight * 0.1,
+      })
+    }).getBoundingClientRect()
 
     const pos = pos_from_date(from);
     const dif = DATE_UTILS.difference(to, from);

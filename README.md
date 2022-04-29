@@ -14,6 +14,7 @@ Simple, extensible scheduler and calendar components for React, modeled after Go
    - Supports click-and-drag event creation
    - Supports daily, weekly, biweekly, weekday, and annual repeating events
    - Works with native JS `Date` objects
+   - Provides a condensed mobile view for small screens
    - Entirely self-contained, with each fitting cleanly into unstyled `<div>`s
    - Fully customizable either by class names or `style` prop
    - Accessible and ARIA-compliant
@@ -268,5 +269,4 @@ To start the demo application, run:
 
 ## To-Do
 
- - Mobile support
  - More accesibility features
