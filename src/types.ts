@@ -1,5 +1,14 @@
 import React from "react";
 
+enum EventRepetition {
+  None,
+  Daily,
+  Weekly,
+  Biweekly,
+  Annually,
+  Weekday
+}
+
 interface DateRange {
   from: Date;
   to: Date;
@@ -29,6 +38,8 @@ interface SchedulerCurrentEvent extends SchedulerEvent {
 
 interface SchedulerExistingEvent extends SchedulerEvent {
   name: string;
+  repeat: EventRepetition;
+  original?: SchedulerEvent;
 }
 
 interface SchedulerStyles {
@@ -44,7 +55,7 @@ interface SchedulerProps {
   setSelected: (val: Date) => void;
 
   onRequestAdd: (evt: SchedulerEvent) => void;
-  onRequestEdit: (evt: SchedulerEvent) => void;
+  onRequestEdit: (evt: SchedulerEvent | undefined) => void;
 
   editable?: boolean,
   style?: SchedulerStyles | null;
@@ -68,6 +79,7 @@ interface CalendarProps {
 }
 
 export {
+  EventRepetition,
   DateRange,
 
   SchedulerRectangle,

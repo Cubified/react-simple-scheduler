@@ -36,7 +36,7 @@ function App() {
             name: "New event",
             style: {
               filter: `hue-rotate(${(events.length + 1) * 40}deg)`,
-            }
+            },
           })
         }
         onRequestEdit={(evt) => {

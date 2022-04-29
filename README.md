@@ -12,6 +12,7 @@ Simple, extensible scheduler and calendar components for React, modeled after Go
  - Provides a month-by-month calendar component, and a week-by-week scheduler component
    - Automatically resizes overlapping events to best fit the screen
    - Supports click-and-drag event creation
+   - Supports daily, weekly, biweekly, weekday, and annual repeating events
    - Works with native JS `Date` objects
    - Entirely self-contained, with each fitting cleanly into unstyled `<div>`s
    - Fully customizable either by class names or `style` prop

@@ -2,11 +2,13 @@ import React, { useState, useEffect, useRef } from "react";
 import DATE_UTILS from "../../date";
 import { DateFormatter, DateRangeFormatter } from "../DateFormatter";
 import {
+  EventRepetition,
   DateRange,
   SchedulerRectangle,
   SchedulerCalendar,
   SchedulerEvent,
   SchedulerCurrentEvent,
+  SchedulerExistingEvent,
   SchedulerStyles,
   SchedulerProps
 } from "../../types";
@@ -47,6 +49,7 @@ const Scheduler = ({
    */
   const [currentEvent, setCurrentEvent] = useState<SchedulerCurrentEvent>(dummyCurrentEvent);
   const [weekStart, setWeekStart] = useState(DATE_UTILS.first_of_week(selected));
+  const [processedEvents, setProcessedEvents] = useState(events);
   const [rerender, setRerender] = useState(0);
 
   const scrollRef = useRef() as React.MutableRefObject<HTMLDivElement>;
@@ -72,6 +75,61 @@ const Scheduler = ({
   }, []);
 
   useEffect(() => setWeekStart(DATE_UTILS.first_of_week(selected)), [selected]);
+
+  useEffect(() => {
+    const out: Array<SchedulerExistingEvent> = [];
+    events.forEach((evt: SchedulerExistingEvent) => {
+      switch(evt.repeat ?? 0){
+        case EventRepetition.None:
+          out.push({
+            ...evt,
+            original: evt,
+          });
+          break;
+        case EventRepetition.Daily:
+          for(let i = 0; i < 7; i++) {
+            out.push({
+              ...evt,
+              from: DATE_UTILS.copy_time(DATE_UTILS.walk_day(weekStart, i), evt.from),
+              to: DATE_UTILS.copy_time(DATE_UTILS.walk_day(weekStart, i), evt.to),
+              original: evt,
+            });
+          }
+          break;
+        case EventRepetition.Biweekly:
+          if(Math.abs(DATE_UTILS.difference_days(weekStart, DATE_UTILS.first_of_week(evt.from)) + 1) % 14 > 0) break;
+          /* Fall through */
+        case EventRepetition.Weekly:
+          out.push({
+            ...evt,
+            from: DATE_UTILS.copy_time(DATE_UTILS.walk_day(weekStart, evt.from.getDay()), evt.from),
+            to: DATE_UTILS.copy_time(DATE_UTILS.walk_day(weekStart, evt.to.getDay()), evt.to),
+            original: evt,
+          });
+          break;
+        case EventRepetition.Annually:
+          if(!DATE_UTILS.is_within_week(weekStart, evt.from, true)) break;
+          out.push({
+            ...evt,
+            from: DATE_UTILS.copy_time(DATE_UTILS.copy_ymd(weekStart, evt.from, true), evt.from),
+            to: DATE_UTILS.copy_time(DATE_UTILS.copy_ymd(weekStart, evt.to, true), evt.to),
+            original: evt,
+          });
+          break;
+        case EventRepetition.Weekday:
+          for(let i = 1; i < 6; i++) {
+            out.push({
+              ...evt,
+              from: DATE_UTILS.copy_time(DATE_UTILS.walk_day(weekStart, i), evt.from),
+              to: DATE_UTILS.copy_time(DATE_UTILS.walk_day(weekStart, i), evt.to),
+              original: evt,
+            });
+          }
+          break;
+      }
+    });
+    setProcessedEvents(out);
+  }, [events, weekStart]);
 
   /*
    * STYLE and FORMATTING
@@ -153,10 +211,10 @@ const Scheduler = ({
       // Compute overlapping elements to determine element width
       //   (Logic mostly copied from observations about Google Calendar,
       //   with a few tweaks)
-      const overlaps: Array<SchedulerEvent> = [];
+      const overlaps: Array<SchedulerExistingEvent> = [];
       let x: number = pos.x;
       let w: number = 0.95 * rect.width;
-      events.forEach((evt) => {
+      processedEvents.forEach((evt) => {
         if (is_enabled(evt) && DATE_UTILS.dates_overlap_exclusive(evt as DateRange, { from, to })) {
           overlaps.push(evt);
         }
@@ -275,6 +333,7 @@ const Scheduler = ({
       to: tmp.to,
       calendar: currentEvent.calendar,
       is_current: false,
+      repeat: EventRepetition.None,
     } as SchedulerEvent);
     setCurrentEvent(dummyCurrentEvent);
   };
@@ -381,7 +440,7 @@ const Scheduler = ({
         <br />
 
         {
-          events.map((evt) => (
+          processedEvents.map((evt) => (
             <div
               key={evt.to.getTime() + evt.from.getTime() + evt.name}
               role="presentation"
@@ -396,7 +455,7 @@ const Scheduler = ({
                   mouse_up(e);
                 } else {
                   setCurrentEvent(dummyCurrentEvent);
-                  onRequestEdit(evt);
+                  onRequestEdit(evt.original);
                 }
               }}
               aria-label={`Event with title ${evt.name}`}

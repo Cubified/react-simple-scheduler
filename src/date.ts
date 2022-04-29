@@ -90,7 +90,7 @@ const last_of_week = (date: Date) => {
   return out;
 };
 
-const is_within_week = (wk: Date, day: Date) => {
+const is_within_week = (wk: Date, day: Date, ignore_year: boolean = false) => {
   const first = new Date(wk);
   first.setDate(first.getDate() - first.getDay());
   first.setHours(0, 0, 0);
@@ -98,6 +98,11 @@ const is_within_week = (wk: Date, day: Date) => {
   const last = new Date(first);
   last.setDate(last.getDate() + 7);
   last.setHours(11, 59, 59);
+
+  if (ignore_year) {
+    first.setFullYear(day.getFullYear());
+    last.setFullYear(day.getFullYear());
+  }
 
   return day >= first && day <= last;
 };
@@ -111,13 +116,16 @@ const compare_times = (a: Date, b: Date) =>
 
 const difference = (a: Date, b: Date) =>
   (a.getHours() - b.getHours()) * HOUR_IN_MS + (a.getMinutes() - b.getMinutes()) * MINUTE_IN_MS;
+const difference_days = (a: Date, b: Date) =>
+  Math.floor((b.getTime() - a.getTime()) / DAY_IN_MS);
+
 const dates_overlap = (a: DateRange, b: DateRange) => a.from <= b.to && a.to >= b.from;
 const dates_overlap_exclusive = (a: DateRange, b: DateRange) => a.from < b.to && a.to > b.from;
 
-const copy_ymd = (date: Date, ymd: Date) => {
+const copy_ymd = (date: Date, ymd: Date, ignore_year: boolean = false) => {
   const tmp = new Date(ymd);
   const cpy = new Date(date);
-  cpy.setFullYear(tmp.getFullYear());
+  if (!ignore_year) cpy.setFullYear(tmp.getFullYear());
   cpy.setMonth(tmp.getMonth());
   cpy.setDate(tmp.getDate());
   return cpy;
@@ -150,6 +158,7 @@ export default {
   compare_times,
 
   difference,
+  difference_days,
 
   dates_overlap,
   dates_overlap_exclusive,
