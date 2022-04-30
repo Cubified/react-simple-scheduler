@@ -5,6 +5,7 @@ enum EventRepetition {
   Daily,
   Weekly,
   Biweekly,
+  Monthly,
   Annually,
   Weekday
 }
@@ -48,6 +49,12 @@ interface SchedulerStyles {
   body: React.CSSProperties;
 }
 
+interface MobileSchedulerStyles {
+  container: React.CSSProperties;
+  event: React.CSSProperties;
+  box: React.CSSProperties;
+}
+
 interface SchedulerProps {
   events: Array<SchedulerExistingEvent>;
 
@@ -88,6 +95,7 @@ export {
   SchedulerCurrentEvent,
   SchedulerExistingEvent,
   SchedulerStyles,
+  MobileSchedulerStyles,
   SchedulerProps,
 
   CalendarStyles,

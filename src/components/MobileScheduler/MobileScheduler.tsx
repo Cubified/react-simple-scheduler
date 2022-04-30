@@ -6,13 +6,18 @@ import {
 } from "../DateFormatter";
 import {
   SchedulerEvent,
-  SchedulerExistingEvent
+  SchedulerExistingEvent,
+  MobileSchedulerStyles
 } from "../../types";
 import "./MobileScheduler.scss";
 
 export default function MobileScheduler(
   { events, onRequestEdit, style }:
-    { events: Array<SchedulerExistingEvent>, onRequestEdit: (evt: SchedulerEvent) => void, style?: React.CSSProperties}
+  {
+    events: Array<SchedulerExistingEvent>,
+    onRequestEdit: (evt: SchedulerEvent) => void,
+    style?: MobileSchedulerStyles
+  }
 ) {
   const [height, setHeight] = useState<number>(-1);
   const scrollRef = useRef() as React.MutableRefObject<HTMLDivElement>;
@@ -31,7 +36,7 @@ export default function MobileScheduler(
     <div
       className="react-simple-mobile-scheduler"
       ref={scrollRef}
-      style={style}
+      style={style?.container ?? {}}
     >
       {sorted.map((evt, ind) => {
         const show_date: boolean = !DATE_UTILS.compare_dates(last, evt.from);
@@ -60,7 +65,7 @@ export default function MobileScheduler(
                 <div className="line" />
               </div>
             )}
-            <div className="event">
+            <div className="event" style={style?.event ?? {}}>
               <div className="date">
                 {show_date && (
                   <>
@@ -74,7 +79,10 @@ export default function MobileScheduler(
               <button
                 type="button"
                 className="box"
-                style={evt.style}
+                style={{
+                  ...evt.style,
+                  ...(style?.box ?? {}),
+                }}
                 onClick={() => onRequestEdit(evt)}
               >
                 <div>

@@ -96,6 +96,9 @@ const Scheduler = ({
             });
           }
           break;
+        case EventRepetition.Monthly:
+          if(Math.abs(DATE_UTILS.difference_days(weekStart, DATE_UTILS.first_of_week(evt.from)) + 1) % 28 > 0) break;
+          /* Fall through */
         case EventRepetition.Biweekly:
           if(Math.abs(DATE_UTILS.difference_days(weekStart, DATE_UTILS.first_of_week(evt.from)) + 1) % 14 > 0) break;
           /* Fall through */
