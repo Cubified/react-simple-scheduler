@@ -48,11 +48,12 @@ function App() {
               style: {
                 filter: `hue-rotate(${(events.length + 1) * 40}deg)`,
               },
+              repeat: 1,
             })
           }
           onRequestEdit={(evt) => {
             alert(`You clicked an event from ${evt.from.toLocaleDateString()} @ ${evt.from.toLocaleTimeString()} until ${evt.to.toLocaleDateString()} @ ${evt.to.toLocaleTimeString()}`);
-            deleteEvent(evt);
+            deleteEvent(evt?.original ?? evt);
           }}
           style={{
             container: { width: "calc(100vw - 200px)" },
@@ -64,7 +65,7 @@ function App() {
           events={events}
           onRequestEdit={(evt) => {
             alert(`You clicked an event from ${evt.from.toLocaleDateString()} @ ${evt.from.toLocaleTimeString()} until ${evt.to.toLocaleDateString()} @ ${evt.to.toLocaleTimeString()}`);
-            deleteEvent(evt);
+            deleteEvent(evt?.original ?? evt);
           }}
           style={{
             width: "calc(100vw - 200px)",

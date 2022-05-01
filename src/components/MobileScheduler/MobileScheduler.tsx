@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import DATE_UTILS from "../../date";
+import process_events from "../../process";
 import {
   DateFormatter,
   DateRangeFormatter,
@@ -19,14 +20,19 @@ export default function MobileScheduler(
     style?: MobileSchedulerStyles
   }
 ) {
+  const [processedEvents, setProcessedEvents] = useState<Array<SchedulerExistingEvent>>([]);
   const [height, setHeight] = useState<number>(-1);
   const scrollRef = useRef() as React.MutableRefObject<HTMLDivElement>;
 
-  const sorted: Array<SchedulerExistingEvent>
-    = events.sort((a: SchedulerExistingEvent, b: SchedulerExistingEvent) =>
-      a.from.getTime() - b.from.getTime());
   let last: Date = new Date(0);
   let has_shown_ticker: boolean = false;
+
+  useEffect(() => {
+    const sorted: Array<SchedulerExistingEvent>
+      = events.sort((a: SchedulerExistingEvent, b: SchedulerExistingEvent) =>
+        a.from.getTime() - b.from.getTime());
+    setProcessedEvents(process_events(sorted, DATE_UTILS.first_of_week(DATE_UTILS.TODAY)));
+  }, [events]);
 
   useEffect(() => {
     if (height > -1) scrollRef.current.scrollTo(0, height);
@@ -38,7 +44,7 @@ export default function MobileScheduler(
       ref={scrollRef}
       style={style?.container ?? {}}
     >
-      {sorted.map((evt, ind) => {
+      {processedEvents.map((evt, ind) => {
         const show_date: boolean = !DATE_UTILS.compare_dates(last, evt.from);
         const show_month: boolean = last.getMonth() !== evt.from.getMonth();
         const show_ticker: boolean = last < DATE_UTILS.TODAY && evt.from >= DATE_UTILS.TODAY;
@@ -65,7 +71,13 @@ export default function MobileScheduler(
                 <div className="line" />
               </div>
             )}
-            <div className="event" style={style?.event ?? {}}>
+            <div
+              className="event"
+              style={{
+                ...(style?.event ?? {}),
+                display: (evt.style?.display ?? "flex")
+              }}
+            >
               <div className="date">
                 {show_date && (
                   <>
@@ -80,8 +92,8 @@ export default function MobileScheduler(
                 type="button"
                 className="box"
                 style={{
-                  ...evt.style,
                   ...(style?.box ?? {}),
+                  ...evt.style,
                 }}
                 onClick={() => onRequestEdit(evt)}
               >
