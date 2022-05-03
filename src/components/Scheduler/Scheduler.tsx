@@ -159,7 +159,7 @@ const Scheduler = ({
       height: `${Math.floor(
         (dif / DATE_UTILS.HOUR_IN_MS) * rect.height
       )}px`,
-      ...style,
+      ...((typeof style === "function" ? style(event) : style) ?? {}),
     };
 
     if (!is_current) {

@@ -48,6 +48,7 @@ export default function MobileScheduler(
         const show_date: boolean = !DATE_UTILS.compare_dates(last, evt.from);
         const show_month: boolean = last.getMonth() !== evt.from.getMonth();
         const show_ticker: boolean = last < DATE_UTILS.TODAY && evt.from >= DATE_UTILS.TODAY;
+        const this_style: React.CSSProperties = (typeof evt.style === "function" ? evt.style(evt) : evt.style) ?? {};
         last = evt.from;
         has_shown_ticker = has_shown_ticker || show_ticker;
 
@@ -75,7 +76,7 @@ export default function MobileScheduler(
               className="event"
               style={{
                 ...(style?.event ?? {}),
-                display: (evt.style?.display ?? "flex")
+                display: (this_style?.display ?? "flex")
               }}
             >
               <div className="date">
@@ -93,7 +94,7 @@ export default function MobileScheduler(
                 className="box"
                 style={{
                   ...(style?.box ?? {}),
-                  ...evt.style,
+                  ...this_style,
                 }}
                 onClick={() => onRequestEdit(evt)}
               >

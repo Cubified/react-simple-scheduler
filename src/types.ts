@@ -30,7 +30,7 @@ interface SchedulerCalendar {
 interface SchedulerEvent extends DateRange {
   calendar: SchedulerCalendar | Array<SchedulerCalendar>;
   is_current: boolean;
-  style?: React.CSSProperties;
+  style?: React.CSSProperties | ((evt: SchedulerEvent) => React.CSSProperties);
 }
 
 interface SchedulerCurrentEvent extends SchedulerEvent {
