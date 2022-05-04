@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/react-simple-scheduler/demo/build/static/css/main.56d31876.css",
-    "main.js": "/react-simple-scheduler/demo/build/static/js/main.7a71d6a8.js",
+    "main.js": "/react-simple-scheduler/demo/build/static/js/main.b44e5561.js",
     "index.html": "/react-simple-scheduler/demo/build/index.html",
     "main.56d31876.css.map": "/react-simple-scheduler/demo/build/static/css/main.56d31876.css.map",
-    "main.7a71d6a8.js.map": "/react-simple-scheduler/demo/build/static/js/main.7a71d6a8.js.map"
+    "main.b44e5561.js.map": "/react-simple-scheduler/demo/build/static/js/main.b44e5561.js.map"
   },
   "entrypoints": [
     "static/css/main.56d31876.css",
-    "static/js/main.7a71d6a8.js"
+    "static/js/main.b44e5561.js"
   ]
 }

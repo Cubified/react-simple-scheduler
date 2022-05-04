@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ReactDOM from 'react-dom';
-import { Calendar, Scheduler, useArrayState } from "@cubedoodl/react-simple-scheduler";
+import { Calendar, Scheduler, MobileScheduler, useArrayState } from "@cubedoodl/react-simple-scheduler";
 /* import { Calendar, Scheduler, MobileScheduler, useArrayState } from "./dist"; */
 import "./index.css";
 
