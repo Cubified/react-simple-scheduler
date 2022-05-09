@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import DATE_UTILS from "../../date";
 import process_events from "../../process";
 import {
@@ -20,19 +20,12 @@ export default function MobileScheduler(
     style?: MobileSchedulerStyles
   }
 ) {
-  const [processedEvents, setProcessedEvents] = useState<Array<SchedulerExistingEvent>>([]);
+  const processedEvents = useMemo(() => process_events(events, DATE_UTILS.first_of_week(DATE_UTILS.TODAY), true), [events]);
   const [height, setHeight] = useState<number>(-1);
   const scrollRef = useRef() as React.MutableRefObject<HTMLDivElement>;
 
   let last: Date = new Date(0);
   let has_shown_ticker: boolean = false;
-
-  useEffect(() => {
-    const sorted: Array<SchedulerExistingEvent>
-      = events.sort((a: SchedulerExistingEvent, b: SchedulerExistingEvent) =>
-        a.from.getTime() - b.from.getTime());
-    setProcessedEvents(process_events(sorted, DATE_UTILS.first_of_week(DATE_UTILS.TODAY)));
-  }, [events]);
 
   useEffect(() => {
     if (height > -1) scrollRef.current.scrollTo(0, height);

@@ -48,7 +48,6 @@ function App() {
               style: {
                 filter: `hue-rotate(${(events.length + 1) * 40}deg)`,
               },
-              repeat: 1,
             })
           }
           onRequestEdit={(evt) => {
@@ -68,8 +67,7 @@ function App() {
             deleteEvent(evt?.original ?? evt);
           }}
           style={{
-            width: "calc(100vw - 200px)",
-            height: "90vh",
+            container: { width: "calc(100vw - 200px)", height: "90vh", }
           }}
         />)
       }

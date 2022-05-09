@@ -4,7 +4,10 @@ import {
 } from "./types";
 import DATE_UTILS from "./date";
 
-function process_events(events: Array<SchedulerExistingEvent>, weekStart: Date) {
+function process_events(events_in: Array<SchedulerExistingEvent>, weekStart: Date, sort: boolean = false) {
+  const events = (sort ? events_in.sort((a: SchedulerExistingEvent, b: SchedulerExistingEvent) =>
+    a.from.getTime() - b.from.getTime()) : events_in);
+
   const out: Array<SchedulerExistingEvent> = [];
   events.forEach((evt: SchedulerExistingEvent) => {
     switch(evt.repeat ?? 0){

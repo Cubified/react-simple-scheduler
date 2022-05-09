@@ -96,8 +96,8 @@ const is_within_week = (wk: Date, day: Date, ignore_year: boolean = false) => {
   first.setHours(0, 0, 0);
 
   const last = new Date(first);
-  last.setDate(last.getDate() + 7);
-  last.setHours(11, 59, 59);
+  last.setDate(last.getDate() + 6);
+  last.setHours(23, 59, 59);
 
   if (ignore_year) {
     first.setFullYear(day.getFullYear());

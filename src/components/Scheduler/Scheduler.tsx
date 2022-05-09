@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import DATE_UTILS from "../../date";
 import process_events from "../../process";
 import { DateFormatter, DateRangeFormatter } from "../DateFormatter";
@@ -50,7 +50,7 @@ const Scheduler = ({
    */
   const [currentEvent, setCurrentEvent] = useState<SchedulerCurrentEvent>(dummyCurrentEvent);
   const [weekStart, setWeekStart] = useState(DATE_UTILS.first_of_week(selected));
-  const [processedEvents, setProcessedEvents] = useState(events);
+  const processedEvents = useMemo(() => process_events(events, weekStart), [events, weekStart]);
   const [rerender, setRerender] = useState(0);
 
   const scrollRef = useRef() as React.MutableRefObject<HTMLDivElement>;
@@ -76,8 +76,6 @@ const Scheduler = ({
   }, []);
 
   useEffect(() => setWeekStart(DATE_UTILS.first_of_week(selected)), [selected]);
-
-  useEffect(() => setProcessedEvents(process_events(events, weekStart)), [events, weekStart]);
 
   /*
    * STYLE and FORMATTING
