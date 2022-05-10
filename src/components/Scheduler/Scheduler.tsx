@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import DATE_UTILS from "../../date";
 import process_events from "../../process";
 import { DateFormatter, DateRangeFormatter } from "../DateFormatter";
@@ -14,6 +14,151 @@ import {
   SchedulerProps
 } from "../../types";
 import "./Scheduler.scss";
+
+/**
+ * Style and formatting utilities, stateless
+ *   therefore redefining them on rerender is
+ *   a waste
+ */
+function date_from_pos(
+  x: number,
+  y: number,
+  eventSizeRef: React.MutableRefObject<HTMLTableDataCellElement>,
+  weekStart: Date
+) {
+  const rect = eventSizeRef.current.getBoundingClientRect();
+
+  const xmod = Math.floor((x - rect.x) / rect.width);
+  const ymod = Math.floor((y - rect.y) / rect.height);
+
+  if (xmod < 0 || ymod < 0) return null;
+
+  const ymin_orig =
+    (((y - rect.y) % rect.height) / rect.height) * 60;
+  const ymin = Math.floor(ymin_orig / 15) * 15;
+
+  const out = DATE_UTILS.walk_day(weekStart, xmod);
+  out.setHours(ymod, ymin, 0);
+
+  return out;
+}
+
+function pos_from_date(
+  date: Date,
+  eventSizeRef: React.MutableRefObject<HTMLTableDataCellElement>,
+  headerRef: React.MutableRefObject<HTMLTableHeaderCellElement>
+) {
+  if(!eventSizeRef.current || !headerRef.current) return { x: 0, y: 0 };
+
+  const rect: SchedulerRectangle = eventSizeRef.current.getBoundingClientRect();
+  const header: SchedulerRectangle = headerRef.current.getBoundingClientRect();
+
+  const x: number = date.getDay() * rect.width + header.width;
+  const y: number =
+    date.getHours() * rect.height +
+    (date.getMinutes() / 60) * rect.height +
+    header.height;
+
+  if(Number.isNaN(x) || Number.isNaN(y)) return {x: 0, y: 0};
+
+  return { x, y };
+}
+
+function styles_from_event(
+  event: SchedulerEvent,
+  eventSizeRef: React.MutableRefObject<HTMLTableDataCellElement>,
+  headerRef: React.MutableRefObject<HTMLTableHeaderCellElement>,
+  processedEvents: Array<SchedulerExistingEvent>
+): React.CSSProperties {
+  let { from, to, style, is_current }: SchedulerEvent = event;
+
+  const is_enabled = (evt: SchedulerEvent) =>
+    (Array.isArray(evt.calendar) ? evt.calendar : [evt.calendar])
+      .some((cal: SchedulerCalendar) => {
+        if (typeof cal.enabled === "boolean") return cal.enabled;
+        return cal.enabled();
+      });
+
+  if (!from || !to) return {};
+  if (!is_enabled(event) && !is_current) {
+    return {
+      display: "none",
+    };
+  }
+
+  if (from > to) {
+    let tmp = from;
+    from = to;
+    to = tmp;
+  }
+
+  const rect = (eventSizeRef.current ?? {
+    getBoundingClientRect: () => ({
+      width: window.innerWidth * 0.1,
+      height: window.innerHeight * 0.1,
+    })
+  }).getBoundingClientRect()
+
+  const pos = pos_from_date(from, eventSizeRef, headerRef);
+  const dif = DATE_UTILS.difference(to, from);
+  if (dif === 0) return {};
+
+  const out: React.CSSProperties = {
+    top: `${pos.y}px`,
+    height: `${Math.floor(
+      (dif / DATE_UTILS.HOUR_IN_MS) * rect.height
+    )}px`,
+    ...((typeof style === "function" ? style(event) : style) ?? {}),
+  };
+
+  if (!is_current) {
+    // Compute overlapping elements to determine element width
+    //   (Logic mostly copied from observations about Google Calendar,
+    //   with a few tweaks)
+    const overlaps: Array<SchedulerExistingEvent> = [];
+    let x: number = pos.x;
+    let w: number = 0.95 * rect.width;
+    processedEvents.forEach((evt) => {
+      if (is_enabled(evt) && DATE_UTILS.dates_overlap_exclusive(evt as DateRange, { from, to })) {
+        overlaps.push(evt);
+      }
+    });
+
+    if (overlaps.length > 0) {
+      let last: SchedulerEvent;
+      overlaps.sort((a: SchedulerEvent, b: SchedulerEvent) => a.from.getTime() - b.from.getTime());
+      overlaps.every((evt, ind) => {
+        if (last) {
+          if (
+            Math.abs(DATE_UTILS.difference(last.from, evt.from)) <=
+            DATE_UTILS.HOUR_IN_MS / 2
+          ) {
+            w /= 2;
+            x += w;
+          } else {
+            w -= 5;
+            x += 5;
+          }
+        }
+        last = evt;
+
+        if (evt === event) {
+          out.zIndex = ind;
+          return false;
+        }
+        return true;
+      });
+    }
+
+    out.left = `${x}px`;
+    out.width = `${w}px`;
+  } else {
+    out.left = `${pos.x}px`;
+    out.width = `${rect.width}px`;
+    out.zIndex = 99;
+  }
+  return out;
+}
 
 /**
  * Main scheduler/timetable view
@@ -51,7 +196,8 @@ const Scheduler = ({
   const [currentEvent, setCurrentEvent] = useState<SchedulerCurrentEvent>(dummyCurrentEvent);
   const [weekStart, setWeekStart] = useState(DATE_UTILS.first_of_week(selected));
   const processedEvents = useMemo(() => process_events(events, weekStart), [events, weekStart]);
-  const [rerender, setRerender] = useState(0);
+  const [, updateState] = useState<Object | null>();
+  const forceUpdate = useCallback(() => updateState({}), []);
 
   const scrollRef = useRef() as React.MutableRefObject<HTMLDivElement>;
   const eventSizeRef = useRef() as React.MutableRefObject<HTMLTableDataCellElement>;
@@ -67,7 +213,7 @@ const Scheduler = ({
     scrollRef.current.scrollTo(0, (eventSizeRef.current.offsetHeight * 8) - 25);
 
     function resize(){
-      setRerender(Math.random());
+      forceUpdate();
     }
 
     resize();
@@ -76,138 +222,6 @@ const Scheduler = ({
   }, []);
 
   useEffect(() => setWeekStart(DATE_UTILS.first_of_week(selected)), [selected]);
-
-  /*
-   * STYLE and FORMATTING
-   */
-  function date_from_pos(x: number, y: number) {
-    const rect = eventSizeRef.current.getBoundingClientRect();
-
-    const xmod = Math.floor((x - rect.x) / rect.width);
-    const ymod = Math.floor((y - rect.y) / rect.height);
-
-    if (xmod < 0 || ymod < 0) return null;
-
-    const ymin_orig =
-      (((y - rect.y) % rect.height) / rect.height) * 60;
-    const ymin = Math.floor(ymin_orig / 15) * 15;
-
-    const out = DATE_UTILS.walk_day(weekStart, xmod);
-    out.setHours(ymod, ymin, 0);
-
-    return out;
-  }
-
-  function pos_from_date(date: Date) {
-    if(!eventSizeRef.current || !headerRef.current) return { x: 0, y: 0 };
-
-    const rect: SchedulerRectangle = eventSizeRef.current.getBoundingClientRect();
-    const header: SchedulerRectangle = headerRef.current.getBoundingClientRect();
-
-    const x: number = date.getDay() * rect.width + header.width;
-    const y: number =
-      date.getHours() * rect.height +
-      (date.getMinutes() / 60) * rect.height +
-      header.height;
-
-    if(Number.isNaN(x) || Number.isNaN(y)) return {x: 0, y: 0};
-
-    return { x, y };
-  }
-
-  function styles_from_event(event: SchedulerEvent): React.CSSProperties {
-    let { from, to, style, is_current }: SchedulerEvent = event;
-
-    const is_enabled = (evt: SchedulerEvent) =>
-      (Array.isArray(evt.calendar) ? evt.calendar : [evt.calendar])
-        .some((cal: SchedulerCalendar) => {
-          if (typeof cal.enabled === "boolean") return cal.enabled;
-          return cal.enabled();
-        });
-
-    if (!from || !to) return {};
-    if (
-      !DATE_UTILS.is_within_week(weekStart, from) ||
-      (!is_enabled(event) && !is_current)
-    ) {
-      return {
-        display: "none",
-      };
-    }
-
-    if (from > to) {
-      let tmp = from;
-      from = to;
-      to = tmp;
-    }
-
-    const rect = (eventSizeRef.current ?? {
-      getBoundingClientRect: () => ({
-        width: window.innerWidth * 0.1,
-        height: window.innerHeight * 0.1,
-      })
-    }).getBoundingClientRect()
-
-    const pos = pos_from_date(from);
-    const dif = DATE_UTILS.difference(to, from);
-    if (dif === 0) return {};
-
-    const out: React.CSSProperties = {
-      top: `${pos.y}px`,
-      height: `${Math.floor(
-        (dif / DATE_UTILS.HOUR_IN_MS) * rect.height
-      )}px`,
-      ...((typeof style === "function" ? style(event) : style) ?? {}),
-    };
-
-    if (!is_current) {
-      // Compute overlapping elements to determine element width
-      //   (Logic mostly copied from observations about Google Calendar,
-      //   with a few tweaks)
-      const overlaps: Array<SchedulerExistingEvent> = [];
-      let x: number = pos.x;
-      let w: number = 0.95 * rect.width;
-      processedEvents.forEach((evt) => {
-        if (is_enabled(evt) && DATE_UTILS.dates_overlap_exclusive(evt as DateRange, { from, to })) {
-          overlaps.push(evt);
-        }
-      });
-
-      if (overlaps.length > 0) {
-        let last: SchedulerEvent;
-        overlaps.sort((a: SchedulerEvent, b: SchedulerEvent) => a.from.getTime() - b.from.getTime());
-        overlaps.every((evt, ind) => {
-          if (last) {
-            if (
-              Math.abs(DATE_UTILS.difference(last.from, evt.from)) <=
-              DATE_UTILS.HOUR_IN_MS / 2
-            ) {
-              w /= 2;
-              x += w;
-            } else {
-              w -= 5;
-              x += 5;
-            }
-          }
-          last = evt;
-
-          if (evt === event) {
-            out.zIndex = ind;
-            return false;
-          }
-          return true;
-        });
-      }
-
-      out.left = `${x}px`;
-      out.width = `${w}px`;
-    } else {
-      out.left = `${pos.x}px`;
-      out.width = `${rect.width}px`;
-      out.zIndex = 99;
-    }
-    return out;
-  };
 
   /*
    * EVENTS
@@ -221,7 +235,7 @@ const Scheduler = ({
     const rect = headerRef.current.getBoundingClientRect();
     if(e.clientY <= rect.y + rect.height) return;
 
-    const from = date_from_pos(e.clientX, e.clientY);
+    const from = date_from_pos(e.clientX, e.clientY, eventSizeRef, weekStart);
     if (!from) return;
     setCurrentEvent({
       ...currentEvent,
@@ -233,18 +247,21 @@ const Scheduler = ({
   const mouse_move = (e: MouseEvent): void => {
     if (!currentEvent || !currentEvent.from.getTime()) return;
 
-    const to = date_from_pos(e.clientX, e.clientY);
+    const to = date_from_pos(e.clientX, e.clientY, eventSizeRef, weekStart);
     if (!to) return;
 
     if (to !== currentEvent.from) {
       if (currentEvent.from.getDate() !== to.getDate()) {
-        setCurrentEvent({
-          ...currentEvent,
-          from: DATE_UTILS.copy_time(new Date(to), currentEvent.from),
-          to,
-          visible: true,
-        } as SchedulerCurrentEvent);
-      } else {
+        const from = DATE_UTILS.copy_time(new Date(to), currentEvent.from);
+        if (currentEvent.from.getTime() !== from.getTime()) {
+          setCurrentEvent({
+            ...currentEvent,
+            from,
+            to,
+            visible: true,
+          } as SchedulerCurrentEvent);
+        }
+      } else if (currentEvent.to.getTime() !== to.getTime()){
         setCurrentEvent({
           ...currentEvent,
           from: currentEvent.from,
@@ -267,7 +284,7 @@ const Scheduler = ({
 
     const tmp = {
       from: currentEvent.from,
-      to: date_from_pos(e.clientX, e.clientY),
+      to: date_from_pos(e.clientX, e.clientY, eventSizeRef, weekStart),
     };
     if (!tmp.to) return;
 
@@ -343,7 +360,7 @@ const Scheduler = ({
 
       <div
         ref={scrollRef}
-        className={`body ${rerender}`}
+        className="body"
         style={style_fixed.body}
         tabIndex={0}
       >
@@ -393,39 +410,42 @@ const Scheduler = ({
         <br />
 
         {
-          processedEvents.map((evt) => (
-            <div
-              key={evt.to.getTime() + evt.from.getTime() + evt.name}
-              role="presentation"
-              className="event"
-              style={styles_from_event(evt)}
-              onMouseDown={mouse_down as any}
-              onMouseMove={mouse_move as any}
-              onMouseUp={(e: any) => {
-                if (currentEvent &&
-                    currentEvent.visible &&
-                    !DATE_UTILS.compare_times(currentEvent.from, currentEvent.to)) {
-                  mouse_up(e);
-                } else {
-                  setCurrentEvent(dummyCurrentEvent);
-                  onRequestEdit(evt);
-                }
-              }}
-              aria-label={`Event with title ${evt.name}`}
-            >
-              <div className="time">
-                <DateRangeFormatter from={evt.from} to={evt.to} />
+          processedEvents
+            .filter((evt) => DATE_UTILS.is_within_week(weekStart, evt.from))
+            .map((evt) => (
+              <div
+                key={evt.to.getTime() + evt.from.getTime() + evt.name}
+                role="presentation"
+                className="event"
+                style={styles_from_event(evt, eventSizeRef, headerRef, processedEvents)}
+                onMouseDown={mouse_down as any}
+                onMouseMove={mouse_move as any}
+                onMouseUp={(e: any) => {
+                  if (currentEvent &&
+                      currentEvent.visible &&
+                      !DATE_UTILS.compare_times(currentEvent.from, currentEvent.to)) {
+                    mouse_up(e);
+                  } else {
+                    setCurrentEvent(dummyCurrentEvent);
+                    onRequestEdit(evt);
+                  }
+                }}
+                aria-label={`Event with title ${evt.name}`}
+              >
+                <div className="time">
+                  <DateRangeFormatter from={evt.from} to={evt.to} />
+                </div>
+                <div className="title">{evt.name}</div>
               </div>
-              <div className="title">{evt.name}</div>
-            </div>
-          ))
+            )
+          )
         }
         {
           (currentEvent && currentEvent.visible) ? (
             <div
               role="presentation"
               className="event current"
-              style={styles_from_event(currentEvent)}
+              style={styles_from_event(currentEvent, eventSizeRef, headerRef, processedEvents)}
               onMouseDown={mouse_down as any}
               onMouseMove={mouse_move as any}
               onMouseUp={mouse_up as any}
@@ -442,8 +462,13 @@ const Scheduler = ({
           className="ticker"
           style={{
             display: DATE_UTILS.is_within_week(weekStart, DATE_UTILS.TODAY) ? "block" : "none",
-            top: `${pos_from_date(DATE_UTILS.TODAY).y}px`,
-            left: `${pos_from_date(DATE_UTILS.TODAY).x}px`,
+            ...(() => {
+              const out = pos_from_date(DATE_UTILS.TODAY, eventSizeRef, headerRef);
+              return {
+                top: `${out.y}px`,
+                left: `${out.x}px`,
+              };
+            })(),
             width: `${eventSizeRef.current ? eventSizeRef.current.getBoundingClientRect().width : 0}px`,
           }}
         >
