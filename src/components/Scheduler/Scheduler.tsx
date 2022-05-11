@@ -161,6 +161,114 @@ function styles_from_event(
 }
 
 /**
+ * Pointer events, isolated for the same
+ *   reason as above
+ */
+function mouse_down(
+  e: MouseEvent,
+  editable: boolean | undefined,
+  eventSizeRef: React.MutableRefObject<HTMLTableDataCellElement>,
+  headerRef: React.MutableRefObject<HTMLTableHeaderCellElement>,
+  weekStart: Date,
+  currentEvent: SchedulerCurrentEvent,
+  setCurrentEvent: (val: SchedulerCurrentEvent) => void
+): void {
+  if(editable === false) return;
+
+  const target = e.target as HTMLElement;
+  if (target.tagName === "TH" || target.className.indexOf("time") > -1) return;
+
+  const rect = headerRef.current.getBoundingClientRect();
+  if(e.clientY <= rect.y + rect.height) return;
+
+  const from = date_from_pos(e.clientX, e.clientY, eventSizeRef, weekStart);
+  if (!from) return;
+  setCurrentEvent({
+    ...currentEvent,
+    from,
+    visible: false,
+  } as SchedulerCurrentEvent);
+};
+
+function mouse_move (
+  e: MouseEvent,
+  eventSizeRef: React.MutableRefObject<HTMLTableDataCellElement>,
+  weekStart: Date,
+  currentEvent: SchedulerCurrentEvent,
+  setCurrentEvent: (val: SchedulerCurrentEvent) => void,
+): void {
+  if (!currentEvent || !currentEvent.from.getTime()) return;
+
+  const to = date_from_pos(e.clientX, e.clientY, eventSizeRef, weekStart);
+  if (!to) return;
+
+  if (to !== currentEvent.from) {
+    if (currentEvent.from.getDate() !== to.getDate()) {
+      const from = DATE_UTILS.copy_time(new Date(to), currentEvent.from);
+      if (currentEvent.from.getTime() !== from.getTime()) {
+        setCurrentEvent({
+          ...currentEvent,
+          from,
+          to,
+          visible: true,
+        } as SchedulerCurrentEvent);
+      }
+    } else if (currentEvent.to.getTime() !== to.getTime()){
+      setCurrentEvent({
+        ...currentEvent,
+        from: currentEvent.from,
+        to,
+        visible: true,
+      } as SchedulerCurrentEvent);
+    }
+  } else {
+    setCurrentEvent({
+      ...currentEvent,
+      from: currentEvent.from,
+      to,
+      visible: false,
+    } as SchedulerCurrentEvent);
+  }
+};
+
+function mouse_up(
+  e: MouseEvent,
+  eventSizeRef: React.MutableRefObject<HTMLTableDataCellElement>,
+  weekStart: Date,
+  currentEvent: SchedulerCurrentEvent,
+  dummyCurrentEvent: SchedulerCurrentEvent,
+  setCurrentEvent: (val: SchedulerCurrentEvent) => void,
+  onRequestAdd: (val: SchedulerEvent) => void
+): void {
+  if (!currentEvent || !currentEvent.from.getTime()) return;
+
+  const tmp = {
+    from: currentEvent.from,
+    to: date_from_pos(e.clientX, e.clientY, eventSizeRef, weekStart),
+  };
+  if (!tmp.to) return;
+
+  if (!tmp.to || DATE_UTILS.compare_times(tmp.from, tmp.to)) {
+    tmp.to = DATE_UTILS.walk_hour(currentEvent.from);
+  }
+
+  if(tmp.from > tmp.to){
+    let d = tmp.from;
+    tmp.from = tmp.to;
+    tmp.to = d;
+  }
+
+  onRequestAdd({
+    from: tmp.from,
+    to: tmp.to,
+    calendar: currentEvent.calendar,
+    is_current: false,
+    repeat: EventRepetition.None,
+  } as SchedulerEvent);
+  setCurrentEvent(dummyCurrentEvent);
+};
+
+/**
  * Main scheduler/timetable view
  */
 const Scheduler = ({
@@ -224,91 +332,6 @@ const Scheduler = ({
   useEffect(() => setWeekStart(DATE_UTILS.first_of_week(selected)), [selected]);
 
   /*
-   * EVENTS
-   */
-  const mouse_down = (e: MouseEvent): void => {
-    if(editable === false) return;
-
-    const target = e.target as HTMLElement;
-    if (target.tagName === "TH" || target.className.indexOf("time") > -1) return;
-
-    const rect = headerRef.current.getBoundingClientRect();
-    if(e.clientY <= rect.y + rect.height) return;
-
-    const from = date_from_pos(e.clientX, e.clientY, eventSizeRef, weekStart);
-    if (!from) return;
-    setCurrentEvent({
-      ...currentEvent,
-      from,
-      visible: false,
-    } as SchedulerCurrentEvent);
-  };
-
-  const mouse_move = (e: MouseEvent): void => {
-    if (!currentEvent || !currentEvent.from.getTime()) return;
-
-    const to = date_from_pos(e.clientX, e.clientY, eventSizeRef, weekStart);
-    if (!to) return;
-
-    if (to !== currentEvent.from) {
-      if (currentEvent.from.getDate() !== to.getDate()) {
-        const from = DATE_UTILS.copy_time(new Date(to), currentEvent.from);
-        if (currentEvent.from.getTime() !== from.getTime()) {
-          setCurrentEvent({
-            ...currentEvent,
-            from,
-            to,
-            visible: true,
-          } as SchedulerCurrentEvent);
-        }
-      } else if (currentEvent.to.getTime() !== to.getTime()){
-        setCurrentEvent({
-          ...currentEvent,
-          from: currentEvent.from,
-          to,
-          visible: true,
-        } as SchedulerCurrentEvent);
-      }
-    } else {
-      setCurrentEvent({
-        ...currentEvent,
-        from: currentEvent.from,
-        to,
-        visible: false,
-      } as SchedulerCurrentEvent);
-    }
-  };
-
-  const mouse_up = (e: MouseEvent): void => {
-    if (!currentEvent || !currentEvent.from.getTime()) return;
-
-    const tmp = {
-      from: currentEvent.from,
-      to: date_from_pos(e.clientX, e.clientY, eventSizeRef, weekStart),
-    };
-    if (!tmp.to) return;
-
-    if (!tmp.to || DATE_UTILS.compare_times(tmp.from, tmp.to)) {
-      tmp.to = DATE_UTILS.walk_hour(currentEvent.from);
-    }
-
-    if(tmp.from > tmp.to){
-      let d = tmp.from;
-      tmp.from = tmp.to;
-      tmp.to = d;
-    }
-
-    onRequestAdd({
-      from: tmp.from,
-      to: tmp.to,
-      calendar: currentEvent.calendar,
-      is_current: false,
-      repeat: EventRepetition.None,
-    } as SchedulerEvent);
-    setCurrentEvent(dummyCurrentEvent);
-  };
-
-  /*
    * RENDER
    */
   return (
@@ -369,9 +392,15 @@ const Scheduler = ({
           className="schedule"
           cellPadding={0}
           cellSpacing={0}
-          onMouseDown={mouse_down as any}
-          onMouseMove={mouse_move as any}
-          onMouseUp={mouse_up as any}
+          onMouseDown={((e: MouseEvent) =>
+            mouse_down(e, editable, eventSizeRef, headerRef, weekStart, currentEvent, setCurrentEvent)) as any
+          }
+          onMouseMove={((e: MouseEvent) =>
+            mouse_move(e, eventSizeRef, weekStart, currentEvent, setCurrentEvent)) as any
+          }
+          onMouseUp={((e: MouseEvent) =>
+            mouse_up(e, eventSizeRef, weekStart, currentEvent, dummyCurrentEvent, setCurrentEvent, onRequestAdd)) as any
+          }
         >
           <thead>
             <tr>
@@ -418,13 +447,25 @@ const Scheduler = ({
                 role="presentation"
                 className="event"
                 style={styles_from_event(evt, eventSizeRef, headerRef, processedEvents)}
-                onMouseDown={mouse_down as any}
-                onMouseMove={mouse_move as any}
+                onMouseDown={((e: MouseEvent) =>
+                  mouse_down(e, editable, eventSizeRef, headerRef, weekStart, currentEvent, setCurrentEvent)) as any
+                }
+                onMouseMove={((e: MouseEvent) =>
+                  mouse_move(e, eventSizeRef, weekStart, currentEvent, setCurrentEvent)) as any
+                }
                 onMouseUp={(e: any) => {
                   if (currentEvent &&
                       currentEvent.visible &&
                       !DATE_UTILS.compare_times(currentEvent.from, currentEvent.to)) {
-                    mouse_up(e);
+                    mouse_up(
+                      e,
+                      eventSizeRef,
+                      weekStart,
+                      currentEvent,
+                      dummyCurrentEvent,
+                      setCurrentEvent,
+                      onRequestAdd
+                    );
                   } else {
                     setCurrentEvent(dummyCurrentEvent);
                     onRequestEdit(evt);
@@ -446,9 +487,15 @@ const Scheduler = ({
               role="presentation"
               className="event current"
               style={styles_from_event(currentEvent, eventSizeRef, headerRef, processedEvents)}
-              onMouseDown={mouse_down as any}
-              onMouseMove={mouse_move as any}
-              onMouseUp={mouse_up as any}
+              onMouseDown={((e: MouseEvent) =>
+                mouse_down(e, editable, eventSizeRef, headerRef, weekStart, currentEvent, setCurrentEvent)) as any
+              }
+              onMouseMove={((e: MouseEvent) =>
+                mouse_move(e, eventSizeRef, weekStart, currentEvent, setCurrentEvent)) as any
+              }
+              onMouseUp={((e: MouseEvent) =>
+                mouse_up(e, eventSizeRef, weekStart, currentEvent, dummyCurrentEvent, setCurrentEvent, onRequestAdd)) as any
+              }
             >
               <div className="time">
                 <DateRangeFormatter from={currentEvent.from} to={currentEvent.to} />
