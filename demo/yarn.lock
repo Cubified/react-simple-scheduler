@@ -1147,10 +1147,10 @@
   resolved "https://registry.yarnpkg.com/@csstools/postcss-unset-value/-/postcss-unset-value-1.0.0.tgz#f6e0e58376f09e381a49bd553772a97a477da3fd"
   integrity sha512-T5ZyNSw9G0x0UDFiXV40a7VjKw2b+l4G+S0sctKqxhx8cg9QtMUAGwJBVU9mHPDPoZEmwm0tEoukjl4zb9MU7Q==
 
-"@cubedoodl/react-simple-scheduler@^1.2.5":
-  version "1.2.5"
-  resolved "https://registry.yarnpkg.com/@cubedoodl/react-simple-scheduler/-/react-simple-scheduler-1.2.5.tgz#0d9d565dbab828c2b18e647cc3e34959d5b90b42"
-  integrity sha512-9bNFvIQqyVTFVbyLIKkF2mVnOaEJuONlJjFmG4N2I/IUgXGJoZklrFge+pP38Vm8nBujIUVXN6lup2Y3fLiL3g==
+"@cubedoodl/react-simple-scheduler@^1.2.6":
+  version "1.2.6"
+  resolved "https://registry.yarnpkg.com/@cubedoodl/react-simple-scheduler/-/react-simple-scheduler-1.2.6.tgz#6ea10d68f08be6fe5c3183fb9dbb6f8efe370844"
+  integrity sha512-MJb7gMtHqw3gq7+Ccokskr6ecfZJQX6rRDaYV90CAmemshv/canIfpxL0ZGKRO/wQ8LsfvfTU6b3B57H+kOdmw==
 
 "@eslint/eslintrc@^1.2.2":
   version "1.2.2"
