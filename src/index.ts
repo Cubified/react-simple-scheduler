@@ -1,4 +1,4 @@
-import { Calendar, Scheduler, MobileScheduler, DateFormatter, DateRangeFormatter } from "./components";
+import { Calendar, Scheduler, MobileScheduler, DateFormatter, DateRangeFormatter, date_format } from "./components";
 import { useArrayState } from "./hooks";
 import dateFunctions from "./date";
 
@@ -8,5 +8,6 @@ export {
   MobileScheduler,
   DateFormatter, DateRangeFormatter,
   useArrayState,
-  dateFunctions
+  dateFunctions,
+  date_format
 };

@@ -1,4 +1,4 @@
-# react-simple-scheduler v1.1.0
+# react-simple-scheduler v1.2.7
 
 | Demo |
 | --- |
