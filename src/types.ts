@@ -85,6 +85,28 @@ interface CalendarProps {
   style?: CalendarStyles | null;
 }
 
+interface TickerProps {
+  weekStart: Date;
+  eventSizeRef: React.MutableRefObject<HTMLTableDataCellElement>;
+  headerRef: React.MutableRefObject<HTMLTableHeaderCellElement>;
+  hasResized: number;
+}
+
+interface EventProps {
+  processedEvents: Array<SchedulerExistingEvent>;
+  weekStart: Date,
+  eventSizeRef: React.MutableRefObject<HTMLTableDataCellElement>;
+  headerRef: React.MutableRefObject<HTMLTableHeaderCellElement>;
+  currentEvent: SchedulerCurrentEvent;
+  setCurrentEvent: (val: SchedulerCurrentEvent) => void;
+  dummyCurrentEvent: SchedulerCurrentEvent;
+
+  editable: boolean | undefined;
+  onRequestAdd: (evt: SchedulerEvent) => void;
+  onRequestEdit: (evt: SchedulerEvent | undefined) => void;
+  hasResized: number;
+}
+
 export {
   EventRepetition,
   DateRange,
@@ -101,4 +123,7 @@ export {
   CalendarStyles,
   CalendarCell,
   CalendarProps,
+
+  TickerProps,
+  EventProps
 }

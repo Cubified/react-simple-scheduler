@@ -11,7 +11,9 @@ import {
   SchedulerCurrentEvent,
   SchedulerExistingEvent,
   SchedulerStyles,
-  SchedulerProps
+  SchedulerProps,
+  TickerProps,
+  EventProps
 } from "../../types";
 import "./Scheduler.scss";
 
@@ -269,6 +271,156 @@ function mouse_up(
 };
 
 /**
+ * Memoized components
+ */
+const Ticker_unmemoized = ({
+  weekStart,
+  eventSizeRef,
+  headerRef
+}: TickerProps) => {
+  return (
+    <div
+      className="ticker"
+      style={{
+        display: DATE_UTILS.is_within_week(weekStart, DATE_UTILS.TODAY) ? "block" : "none",
+        ...(() => {
+          const out = pos_from_date(DATE_UTILS.TODAY, eventSizeRef, headerRef);
+          return {
+            top: `${out.y}px`,
+            left: `${out.x}px`,
+          };
+        })(),
+        width: `${eventSizeRef.current ? eventSizeRef.current.getBoundingClientRect().width : 0}px`,
+      }}
+    >
+      <div className="ball" />
+      <div className="line" />
+    </div>
+  );
+};
+const Ticker = React.memo(
+  Ticker_unmemoized,
+  (prev: TickerProps, next: TickerProps): boolean => {
+    const ev_prev = prev.eventSizeRef.current.getBoundingClientRect();
+    const ev_next = next.eventSizeRef.current.getBoundingClientRect();
+
+    const head_prev = prev.headerRef.current.getBoundingClientRect();
+    const head_next = next.headerRef.current.getBoundingClientRect();
+
+    return (
+      (prev.weekStart.getTime() === next.weekStart.getTime()) &&
+      (JSON.stringify(ev_prev) === JSON.stringify(ev_next)) &&
+      (JSON.stringify(head_prev) === JSON.stringify(head_next)) &&
+      (prev.hasResized === next.hasResized)
+    );
+  }
+);
+
+const Events_unmemoized = ({
+  processedEvents,
+  weekStart,
+  eventSizeRef,
+  headerRef,
+  currentEvent,
+  setCurrentEvent,
+  dummyCurrentEvent,
+
+  editable,
+  onRequestAdd,
+  onRequestEdit
+}: EventProps) => {
+  return (<>
+    {
+      processedEvents
+        .filter((evt) => DATE_UTILS.is_within_week(weekStart, evt.from))
+        .map((evt) => (
+          <div
+            key={evt.to.getTime() + evt.from.getTime() + evt.name}
+            role="presentation"
+            className="event"
+            style={styles_from_event(evt, eventSizeRef, headerRef, processedEvents)}
+            onMouseDown={((e: MouseEvent) =>
+              mouse_down(e, editable, eventSizeRef, headerRef, weekStart, currentEvent, setCurrentEvent)) as any
+            }
+            onMouseMove={((e: MouseEvent) =>
+              mouse_move(e, eventSizeRef, weekStart, currentEvent, setCurrentEvent)) as any
+            }
+            onMouseUp={(e: any) => {
+              if (currentEvent &&
+                  currentEvent.visible &&
+                  !DATE_UTILS.compare_times(currentEvent.from, currentEvent.to)) {
+                mouse_up(
+                  e,
+                  eventSizeRef,
+                  weekStart,
+                  currentEvent,
+                  dummyCurrentEvent,
+                  setCurrentEvent,
+                  onRequestAdd
+                );
+              } else {
+                setCurrentEvent(dummyCurrentEvent);
+                onRequestEdit(evt);
+              }
+            }}
+            aria-label={`Event with title ${evt.name}`}
+          >
+            <div className="time">
+              <DateRangeFormatter from={evt.from} to={evt.to} />
+            </div>
+            <div className="title">{evt.name}</div>
+          </div>
+        )
+      )
+    }
+    {
+      (currentEvent && currentEvent.visible) ? (
+        <div
+          role="presentation"
+          className="event current"
+          style={styles_from_event(currentEvent, eventSizeRef, headerRef, processedEvents)}
+          onMouseDown={((e: MouseEvent) =>
+            mouse_down(e, editable, eventSizeRef, headerRef, weekStart, currentEvent, setCurrentEvent)) as any
+          }
+          onMouseMove={((e: MouseEvent) =>
+            mouse_move(e, eventSizeRef, weekStart, currentEvent, setCurrentEvent)) as any
+          }
+          onMouseUp={((e: MouseEvent) =>
+            mouse_up(e, eventSizeRef, weekStart, currentEvent, dummyCurrentEvent, setCurrentEvent, onRequestAdd)) as any
+          }
+        >
+          <div className="time">
+            <DateRangeFormatter from={currentEvent.from} to={currentEvent.to} />
+          </div>
+          <div className="title">(No title)</div>
+        </div>
+      ) : null
+    }
+  </>);
+};
+const Events = React.memo(
+  Events_unmemoized,
+  (prev: EventProps, next: EventProps): boolean => {
+    const ev_prev = prev.eventSizeRef.current.getBoundingClientRect();
+    const ev_next = next.eventSizeRef.current.getBoundingClientRect();
+
+    const head_prev = prev.headerRef.current.getBoundingClientRect();
+    const head_next = next.headerRef.current.getBoundingClientRect();
+
+    return ((
+      (prev.processedEvents.length === next.processedEvents.length) &&
+      (prev.weekStart.getTime() === next.weekStart.getTime()) &&
+      (JSON.stringify(ev_prev) === JSON.stringify(ev_next)) &&
+      (JSON.stringify(head_prev) === JSON.stringify(head_next)) &&
+      (prev.currentEvent.from.getTime() === next.currentEvent.from.getTime()) &&
+      (prev.currentEvent.to.getTime() === next.currentEvent.to.getTime()) &&
+      (prev.currentEvent.visible === next.currentEvent.visible) &&
+      (prev.hasResized === next.hasResized)
+    ));
+  }
+);
+
+/**
  * Main scheduler/timetable view
  */
 const Scheduler = ({
@@ -304,8 +456,7 @@ const Scheduler = ({
   const [currentEvent, setCurrentEvent] = useState<SchedulerCurrentEvent>(dummyCurrentEvent);
   const [weekStart, setWeekStart] = useState(DATE_UTILS.first_of_week(selected));
   const processedEvents = useMemo(() => process_events(events, weekStart), [events, weekStart]);
-  const [, updateState] = useState<Object | null>();
-  const forceUpdate = useCallback(() => updateState({}), []);
+  const [hasResized, setHasResized] = useState<number>(0);
 
   const scrollRef = useRef() as React.MutableRefObject<HTMLDivElement>;
   const eventSizeRef = useRef() as React.MutableRefObject<HTMLTableDataCellElement>;
@@ -321,7 +472,7 @@ const Scheduler = ({
     scrollRef.current.scrollTo(0, (eventSizeRef.current.offsetHeight * 8) - 25);
 
     function resize(){
-      forceUpdate();
+      setHasResized(Math.random());
     }
 
     resize();
@@ -438,90 +589,27 @@ const Scheduler = ({
         </table>
         <br />
 
-        {
-          processedEvents
-            .filter((evt) => DATE_UTILS.is_within_week(weekStart, evt.from))
-            .map((evt) => (
-              <div
-                key={evt.to.getTime() + evt.from.getTime() + evt.name}
-                role="presentation"
-                className="event"
-                style={styles_from_event(evt, eventSizeRef, headerRef, processedEvents)}
-                onMouseDown={((e: MouseEvent) =>
-                  mouse_down(e, editable, eventSizeRef, headerRef, weekStart, currentEvent, setCurrentEvent)) as any
-                }
-                onMouseMove={((e: MouseEvent) =>
-                  mouse_move(e, eventSizeRef, weekStart, currentEvent, setCurrentEvent)) as any
-                }
-                onMouseUp={(e: any) => {
-                  if (currentEvent &&
-                      currentEvent.visible &&
-                      !DATE_UTILS.compare_times(currentEvent.from, currentEvent.to)) {
-                    mouse_up(
-                      e,
-                      eventSizeRef,
-                      weekStart,
-                      currentEvent,
-                      dummyCurrentEvent,
-                      setCurrentEvent,
-                      onRequestAdd
-                    );
-                  } else {
-                    setCurrentEvent(dummyCurrentEvent);
-                    onRequestEdit(evt);
-                  }
-                }}
-                aria-label={`Event with title ${evt.name}`}
-              >
-                <div className="time">
-                  <DateRangeFormatter from={evt.from} to={evt.to} />
-                </div>
-                <div className="title">{evt.name}</div>
-              </div>
-            )
-          )
-        }
-        {
-          (currentEvent && currentEvent.visible) ? (
-            <div
-              role="presentation"
-              className="event current"
-              style={styles_from_event(currentEvent, eventSizeRef, headerRef, processedEvents)}
-              onMouseDown={((e: MouseEvent) =>
-                mouse_down(e, editable, eventSizeRef, headerRef, weekStart, currentEvent, setCurrentEvent)) as any
-              }
-              onMouseMove={((e: MouseEvent) =>
-                mouse_move(e, eventSizeRef, weekStart, currentEvent, setCurrentEvent)) as any
-              }
-              onMouseUp={((e: MouseEvent) =>
-                mouse_up(e, eventSizeRef, weekStart, currentEvent, dummyCurrentEvent, setCurrentEvent, onRequestAdd)) as any
-              }
-            >
-              <div className="time">
-                <DateRangeFormatter from={currentEvent.from} to={currentEvent.to} />
-              </div>
-              <div className="title">(No title)</div>
-            </div>
-          ) : null
-        }
+        <Events
+          processedEvents={processedEvents}
+          weekStart={weekStart}
+          eventSizeRef={eventSizeRef}
+          headerRef={headerRef}
+          currentEvent={currentEvent}
+          setCurrentEvent={setCurrentEvent}
+          dummyCurrentEvent={dummyCurrentEvent}
 
-        <div
-          className="ticker"
-          style={{
-            display: DATE_UTILS.is_within_week(weekStart, DATE_UTILS.TODAY) ? "block" : "none",
-            ...(() => {
-              const out = pos_from_date(DATE_UTILS.TODAY, eventSizeRef, headerRef);
-              return {
-                top: `${out.y}px`,
-                left: `${out.x}px`,
-              };
-            })(),
-            width: `${eventSizeRef.current ? eventSizeRef.current.getBoundingClientRect().width : 0}px`,
-          }}
-        >
-          <div className="ball" />
-          <div className="line" />
-        </div>
+          editable={editable}
+          onRequestAdd={onRequestAdd}
+          onRequestEdit={onRequestEdit}
+          hasResized={hasResized}
+        />
+
+        <Ticker
+          weekStart={weekStart}
+          eventSizeRef={eventSizeRef}
+          headerRef={headerRef}
+          hasResized={hasResized}
+        />
       </div>
     </div>
   );
