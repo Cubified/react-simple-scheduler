@@ -103,10 +103,16 @@ export default function MobileScheduler(
         );
       })}
       {!has_shown_ticker && (
-        <div className="ticker">
-          <div className="ball" />
-          <div className="line" />
-        </div>
+        (processedEvents.length > 0) ? (
+          <div className="ticker">
+            <div className="ball" />
+            <div className="line" />
+          </div>
+        ) : (
+          <div className="none">
+            No events yet.
+          </div>
+        )
       )}
     </div>
   );
