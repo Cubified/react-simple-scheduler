@@ -56,15 +56,37 @@ interface MobileSchedulerStyles {
 }
 
 interface SchedulerProps {
-  events: Array<SchedulerExistingEvent>;
-
+  /**
+   * The array of events to be drawn on the scheduler.
+   */
+  events: SchedulerExistingEvent[];
+  /**
+   * The currently-selected date.
+   *
+   * This can be selected using the `Calendar` component.
+   */
   selected: Date;
+  /**
+   * Callback to set the selected date.
+   */
   setSelected: (val: Date) => void;
-
+  /**
+   * The function called when the user requests a new event be created.
+   */
   onRequestAdd: (evt: SchedulerEvent) => void;
+  /**
+   * The function called when the user clicks on an existing event.
+   */
   onRequestEdit: (evt: SchedulerEvent | undefined) => void;
-
-  editable?: boolean,
+  /**
+   * Whether click-and-drag event creation is enabled.
+   */
+  editable?: boolean;
+  /**
+   * The style objects to be passed to the calendar's elements.
+   *
+   * See [here](https://github.com/Cubified/react-simple-scheduler?tab=readme-ov-file#style-1) for more information.
+   */
   style?: SchedulerStyles | null;
 }
 

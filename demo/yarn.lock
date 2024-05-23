@@ -1147,10 +1147,10 @@
   resolved "https://registry.yarnpkg.com/@csstools/postcss-unset-value/-/postcss-unset-value-1.0.0.tgz#f6e0e58376f09e381a49bd553772a97a477da3fd"
   integrity sha512-T5ZyNSw9G0x0UDFiXV40a7VjKw2b+l4G+S0sctKqxhx8cg9QtMUAGwJBVU9mHPDPoZEmwm0tEoukjl4zb9MU7Q==
 
-"@cubedoodl/react-simple-scheduler@^1.2.6":
-  version "1.2.6"
-  resolved "https://registry.yarnpkg.com/@cubedoodl/react-simple-scheduler/-/react-simple-scheduler-1.2.6.tgz#6ea10d68f08be6fe5c3183fb9dbb6f8efe370844"
-  integrity sha512-MJb7gMtHqw3gq7+Ccokskr6ecfZJQX6rRDaYV90CAmemshv/canIfpxL0ZGKRO/wQ8LsfvfTU6b3B57H+kOdmw==
+"@cubedoodl/react-simple-scheduler@^1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@cubedoodl/react-simple-scheduler/-/react-simple-scheduler-1.3.0.tgz#c6ecc6a4d45e94ab039c6e5d4f38a249fb3ab778"
+  integrity sha512-51Jt4E6DVigJN/H3UxBkQ0Cwo9lJ4hYpviml1SuJPVu1ek6yg+YDAn6LG1b57oitVDVeOjy2b8TzLUIjlx2Xqg==
 
 "@eslint/eslintrc@^1.2.2":
   version "1.2.2"
@@ -7184,13 +7184,12 @@ react-scripts@5.0.0:
   optionalDependencies:
     fsevents "^2.3.2"
 
-react@^17.0.2:
-  version "17.0.2"
-  resolved "https://registry.yarnpkg.com/react/-/react-17.0.2.tgz#d0b5cc516d29eb3eee383f75b62864cfb6800037"
-  integrity sha512-gnhPt75i/dq/z3/6q/0asP78D0u592D5L1pd7M8P+dck6Fu/jJeL6iVVK23fptSUZj8Vjf++7wXA8UNclGQcbA==
+react@^18.2.0:
+  version "18.3.1"
+  resolved "https://registry.yarnpkg.com/react/-/react-18.3.1.tgz#49ab892009c53933625bd16b2533fc754cab2891"
+  integrity sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ==
   dependencies:
     loose-envify "^1.1.0"
-    object-assign "^4.1.1"
 
 readable-stream@^2.0.1:
   version "2.3.7"

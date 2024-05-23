@@ -1,7 +1,6 @@
 import resolve from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import replace from "@rollup/plugin-replace";
-import dts from "rollup-plugin-dts";
 import { terser } from "rollup-plugin-terser";
 import peerDepsExternal from 'rollup-plugin-peer-deps-external';
 import postcss from "rollup-plugin-postcss";
@@ -31,11 +30,5 @@ export default [
       postcss(),
       terser(),
     ],
-  },
-  {
-    input: "src/types.ts",
-    output: [{ file: "dist/index.d.ts", format: "esm" }],
-    plugins: [dts()],
-    external: [/\.scss$/],
   },
 ];
